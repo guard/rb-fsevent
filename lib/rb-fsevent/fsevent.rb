@@ -1,8 +1,8 @@
 class FSEvent
-  attr_reader :paths, :latency, :callback, :pipe
+  attr_reader :path, :latency, :callback, :pipe
   
-  def watch(paths, options = {}, &callback)
-    @paths    = paths.is_a?(Array) ? paths : Array.new(paths.split)
+  def watch(path, options = {}, &callback)
+    @path     = path
     @latency  = options[:latency] || 0.5
     @callback = callback
   end
@@ -23,7 +23,7 @@ private
   end
   
   def launch_bin
-    @pipe = IO.popen("#{bin_path}/rb-fsevent #{paths.join(',')} #{latency}")
+    @pipe = IO.popen("#{bin_path}/rb-fsevent #{path} #{latency}")
   end
   
   def listen
