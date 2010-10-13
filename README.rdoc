@@ -1,0 +1,32 @@
+= rb-fsevent
+
+Very simple & usable Mac OSX FSEvents API
+
+- No compilation needed (FFI)
+- RubyCocoa not required!
+- Signals are working
+- Working on Ruby 1.8.7 & 1.9.2
+
+== Install
+
+    gem install rb-fsevent
+
+== Usage
+
+    fsevent = FSEvent.new
+    fsevent.watch Dir.pwd do |directories|
+      puts "Detected change inside: #{directories.inspect}"
+    end
+    fsevent.run
+
+== Development
+
+- Source hosted at {GitHub}[http://github.com/guard/guard-spork]
+- Report issues/Questions/Feature requests on {GitHub Issues}[http://github.com/guard/guard-spork/issues]
+
+Pull requests are very welcome! Make sure your patches are well tested. Please create a topic branch for every separate change
+you make.
+
+== Authors
+
+{Thibaud Guillaume-Gentil}[http://github.com/thibaudgg]
