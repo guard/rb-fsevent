@@ -33,8 +33,6 @@ private
         callback.call(modified_dir_paths)
       end
     end
-  rescue Interrupt
-    stop
   end
   
 end
