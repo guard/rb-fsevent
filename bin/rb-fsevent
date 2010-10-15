@@ -48,7 +48,8 @@ class FSEventStream
     callback = lambda do |stream, client_callback_info, number_of_events, event_paths, event_flags, event_ids|
       if number_of_events > 0
         paths = event_paths.get_array_of_string(0, number_of_events)
-        $stderr.puts paths.join(" ")
+        $stdout.puts paths.join(" ")
+        $stdout.flush
       end
     end
     
