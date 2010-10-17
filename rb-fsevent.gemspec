@@ -4,7 +4,7 @@ require "rb-fsevent/version"
 
 Gem::Specification.new do |s|
   s.name        = "rb-fsevent"
-  s.version     = RbFSEvent::VERSION
+  s.version     = FSEvent::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Thibaud Guillaume-Gentil']
   s.email       = ['thibaud@thibaud.me']

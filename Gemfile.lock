@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rb-fsevent (0.3.0)
+    rb-fsevent (0.3.1)
 
 GEM
   remote: http://rubygems.org/
@@ -11,7 +11,7 @@ GEM
       rake (>= 0.8.7)
     ffi (0.6.3-java)
     growl (1.0.3)
-    guard (0.1.1)
+    guard (0.1.2)
       bundler (~> 1.0.2)
       growl (~> 1.0.3)
       libnotify (~> 0.1.3)
