@@ -1,8 +1,4 @@
-#!/usr/bin/env ruby
-require 'rubygems'
 require 'ffi'
-
-paths, latency = ARGV[0].split(','), ARGV[1].to_f
 
 module CarbonCore
   extend FFI::Library
@@ -35,7 +31,7 @@ class FSEventStream
   
   attr_accessor :stream
   
-  def initialize(paths, latency)
+  def initialize(paths, latency, block)
     # Create array of paths to observe
     paths_ptr = FFI::MemoryPointer.new(:pointer)
     paths.each do |path|
@@ -48,8 +44,9 @@ class FSEventStream
     callback = lambda do |stream, client_callback_info, number_of_events, event_paths, event_flags, event_ids|
       if number_of_events > 0
         paths = event_paths.get_array_of_string(0, number_of_events)
-        $stdout.puts paths.join(" ")
-        $stdout.flush
+        block.call(paths)
+        # $stdout.puts paths.join(" ")
+        # $stdout.flush
       end
     end
     
@@ -67,6 +64,3 @@ class FSEventStream
     CarbonCore.FSEventStreamStop(stream)
   end
 end
-
-stream = FSEventStream.new(paths, latency)
-stream.run_loop
