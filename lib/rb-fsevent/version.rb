@@ -1,3 +1,3 @@
-module RbFSEvent
-  VERSION = "0.3.0"
+class FSEvent
+  VERSION = "0.3.1"
 end
