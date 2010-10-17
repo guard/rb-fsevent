@@ -42,8 +42,9 @@ describe FSEvent do
   end
   
   def run
+    sleep 1
     Thread.new { @fsevent.run }
-    sleep 2
+    sleep 1
   end
   
   def stop

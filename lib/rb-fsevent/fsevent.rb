@@ -1,9 +1,8 @@
 class FSEvent
-  attr_reader :path, :latency, :callback, :pipe
+  attr_reader :path, :callback, :pipe
   
-  def watch(path, options = {}, &callback)
+  def watch(path, &callback)
     @path     = path
-    @latency  = options[:latency] || 0.5
     @callback = callback
   end
   
@@ -13,7 +12,7 @@ class FSEvent
   end
   
   def stop
-    Process.kill("KILL", pipe.pid) if pipe
+    Process.kill("HUP", pipe.pid) if pipe
   end
   
 private
@@ -23,16 +22,18 @@ private
   end
   
   def launch_bin
-    @pipe = IO.popen("#{bin_path}/rb-fsevent #{path} #{latency}")
+    @pipe = IO.popen("#{bin_path}/fsevent_watch #{path}")
   end
   
   def listen
     while !pipe.eof?
       if line = pipe.readline
-        modified_dir_paths = line.split(" ")
+        modified_dir_paths = line.split(":").select { |dir| dir != "\n" }
         callback.call(modified_dir_paths)
       end
     end
+  rescue Interrupt
+    stop
   end
   
 end
