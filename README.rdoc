@@ -20,7 +20,7 @@ Very simple & usable Mac OSX FSEvents API
     end
     fsevent.run
 
-== Not about FFI
+== Note about FFI
 
 rb-fsevent doesn't use {ruby-ffi}[http://github.com/ffi/ffi] anymore because it sadly doesn't allow to catch Signals, you can see the code in {ffi branch}[http://github.com/thibaudgg/rb-fsevent/tree/ffi].
 
