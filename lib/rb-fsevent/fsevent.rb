@@ -2,6 +2,9 @@ class FSEvent
   attr_reader :path, :callback, :pipe
   
   def watch(path, &callback)
+    unless path.index("'").nil?
+      fail ArgumentError, "Invalid character found in path: '", caller
+    end
     @path     = path
     @callback = callback
   end
