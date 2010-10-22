@@ -7,24 +7,6 @@ GEM
   remote: http://rubygems.org/
   specs:
     diff-lcs (1.1.2)
-    ffi (0.6.3)
-      rake (>= 0.8.7)
-    ffi (0.6.3-java)
-    growl (1.0.3)
-    guard (0.1.2)
-      bundler (~> 1.0.2)
-      growl (~> 1.0.3)
-      libnotify (~> 0.1.3)
-      rb-inotify (~> 0.8.1)
-      sys-uname (~> 0.8.4)
-      thor (~> 0.14.3)
-    guard-rspec (0.1.3)
-      guard
-    libnotify (0.1.4)
-      ffi (>= 0.6.2)
-    rake (0.8.7)
-    rb-inotify (0.8.1)
-      ffi (>= 0.5.0)
     rspec (2.0.0)
       rspec-core (= 2.0.0)
       rspec-expectations (= 2.0.0)
@@ -35,8 +17,6 @@ GEM
     rspec-mocks (2.0.0)
       rspec-core (= 2.0.0)
       rspec-expectations (= 2.0.0)
-    sys-uname (0.8.4)
-    thor (0.14.3)
 
 PLATFORMS
   java
@@ -44,6 +24,5 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.0.2)
-  guard-rspec (~> 0.1.3)
   rb-fsevent!
   rspec (~> 2.0.0)

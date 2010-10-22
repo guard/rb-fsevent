@@ -10,6 +10,18 @@ describe FSEvent do
     end
   end
   
+  it "should prevent paths with an apostrophe" do
+    fsevent = FSEvent.new
+    error = false
+    begin
+      fsevent.watch "./path with ' in it"
+    rescue ArgumentError
+      error = true
+    ensure
+      error.should be_true
+    end
+  end
+  
   it "should catch new file" do
     file = @fixture_path.join("newfile.rb")
     File.exists?(file).should be_false
