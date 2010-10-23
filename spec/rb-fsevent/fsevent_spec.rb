@@ -10,6 +10,20 @@ describe FSEvent do
     end
   end
   
+  it "should work with path with an apostrophe" do
+    custom_path =  @fixture_path.join("custom 'path")
+    @fsevent.watch custom_path.to_s do |paths|
+      @results += paths
+    end
+    file = custom_path.join("newfile.rb")
+    File.exists?(file).should be_false
+    run
+    FileUtils.touch file
+    stop
+    File.delete file
+    @results.should == [custom_path.to_s + '/']
+  end
+  
   it "should catch new file" do
     file = @fixture_path.join("newfile.rb")
     File.exists?(file).should be_false

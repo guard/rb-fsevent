@@ -22,7 +22,7 @@ private
   end
   
   def launch_bin
-    @pipe = IO.popen("#{bin_path}/fsevent_watch #{path}")
+      @pipe = IO.popen("#{bin_path}/fsevent_watch #{path.shellescape}")
   end
   
   def listen
