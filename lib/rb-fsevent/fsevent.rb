@@ -12,7 +12,10 @@ class FSEvent
   end
   
   def stop
-    Process.kill("KILL", pipe.pid) if pipe
+    if pipe
+      Process.kill("KILL", pipe.pid)
+      pipe.close
+    end
   end
   
 private
