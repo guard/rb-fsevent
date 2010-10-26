@@ -4,7 +4,7 @@ Very simple & usable Mac OSX FSEvents API
 
 - RubyCocoa not required!
 - Signals are working
-- Tested on Ruby 1.8.7 & 1.9.2
+- Tested on Ruby 1.8.6, 1.8.7 & 1.9.2
 
 == Install
 
