@@ -35,7 +35,7 @@ private
         callback.call(modified_dir_paths)
       end
     end
-  rescue Interrupt
+  rescue Interrupt, IOError
     stop
   end
   
