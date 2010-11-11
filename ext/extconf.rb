@@ -3,7 +3,7 @@ require 'mkmf'
 create_makefile('none')
 
 if `uname -s`.chomp != 'Darwin'
-  puts "Only Darwin (Mac OS X) systems are supported, nothing will be compiled"
+  puts "Warning! Only Darwin (Mac OS X) systems are supported, nothing will be compiled"
 else
   gem_root      = File.expand_path(File.join('..'))
   darwin_verion = `uname -r`.to_i
