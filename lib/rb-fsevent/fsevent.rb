@@ -16,7 +16,7 @@ class FSEvent
       Process.kill("KILL", pipe.pid)
       pipe.close
     end
-  rescue Interrupt, IOError
+  rescue IOError
   end
   
 private
