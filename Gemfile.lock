@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rb-fsevent (0.3.8)
+    rb-fsevent (0.3.9)
 
 GEM
   remote: http://rubygems.org/
