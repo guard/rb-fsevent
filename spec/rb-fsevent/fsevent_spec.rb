@@ -9,7 +9,29 @@ describe FSEvent do
       @results += paths
     end
   end
-  
+
+  it "should work when a lot of fs events are fired" do
+    custom_path =  @fixture_path.join("custom path")
+    @fsevent.watch custom_path.to_s do |paths|
+      @results += paths
+    end
+    run
+		10000.times do |idx|
+	    file = custom_path.join("newfile #{idx}.rb")
+	    File.exists?(file).should be_false
+			`mkdir -p #{File.dirname(file)}`
+	    FileUtils.touch file			
+		end
+		stop
+		10000.times do |idx|
+	    file = custom_path.join("newfile #{idx}.rb")
+	    File.exists?(file).should be_true
+    	File.delete file
+		end
+
+    @results.count.should == 10000
+  end  
+
   it "should work with path with an apostrophe" do
     custom_path =  @fixture_path.join("custom 'path")
     @fsevent.watch custom_path.to_s do |paths|

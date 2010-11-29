@@ -1,5 +1,6 @@
 require 'rspec'
 require 'rb-fsevent'
+require 'fileutils'
 
 RSpec.configure do |config|
   config.color_enabled = true
