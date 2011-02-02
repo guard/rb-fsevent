@@ -19,9 +19,14 @@ void callback(ConstFSEventStreamRef streamRef,
 }
 
 int main (int argc, const char * argv[]) {
+  // Collect arguments as paths to watch
+  CFMutableArrayRef pathsToWatch = CFArrayCreateMutable(NULL, argc-1, NULL);
+  int i;
+  for(i=1; i<argc; i++) {
+    CFArrayAppendValue(pathsToWatch, CFStringCreateWithCString(kCFAllocatorDefault, argv[i], kCFStringEncodingUTF8));
+  }
+
   // Create event stream
-  CFStringRef pathToWatch = CFStringCreateWithCString(kCFAllocatorDefault, argv[1], kCFStringEncodingUTF8);
-  CFArrayRef pathsToWatch = CFArrayCreate(NULL, (const void **)&pathToWatch, 1, NULL);  
   void *callbackInfo = NULL;
   FSEventStreamRef stream;
   CFAbsoluteTime latency = 0.5;
@@ -34,11 +39,11 @@ int main (int argc, const char * argv[]) {
     latency,
     kFSEventStreamCreateFlagNone
   );
-  
+
   // Add stream to run loop
   FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
   FSEventStreamStart(stream);
   CFRunLoopRun();
-  
+
   return 2;
 }
