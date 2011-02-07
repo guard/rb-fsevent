@@ -11,13 +11,13 @@ Gem::Specification.new do |s|
   s.homepage    = "http://rubygems.org/gems/rb-fsevent"
   s.summary     = "Very simple & usable FSEvents API"
   s.description = "FSEvents API with Signals catching (without RubyCocoa)"
-  
+
   s.rubyforge_project = "rb-fsevent"
-  
-  s.add_development_dependency  'bundler',     '~> 1.0.3'
-  s.add_development_dependency  'rspec',       '~> 2.0.1'
-  s.add_development_dependency  'guard-rspec', '~> 0.1.4'
-  
+
+  s.add_development_dependency  'bundler',     '~> 1.0.10'
+  s.add_development_dependency  'rspec',       '~> 2.5.0'
+  s.add_development_dependency  'guard-rspec', '~> 0.1.9'
+
   s.files        = Dir.glob('{lib,ext}/**/*') + %w[LICENSE README.rdoc]
   s.extensions   = ['ext/extconf.rb']
   s.require_path = 'lib'
