@@ -93,7 +93,9 @@ void parse_cli_settings(int argc,
   cli_settings->sinceWhen = 0xFFFFFFFFFFFFFFFFULL;
   cli_settings->latency = 0.5;
   cli_settings->flags = FWDefaultFSEventStreamCreateFlags;
-  cli_settings->paths = CFArrayCreateMutable(NULL, (CFIndex)0, &kCFTypeArrayCallBacks);
+  cli_settings->paths = CFArrayCreateMutable(NULL,
+                                             (CFIndex)0,
+                                             &kCFTypeArrayCallBacks);
 
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "--since_when") == 0) {
@@ -144,15 +146,20 @@ static void callback(ConstFSEventStreamRef streamRef,
                      const FSEventStreamEventFlags eventFlags[],
                      const FSEventStreamEventId eventIds[])
 {
+  char **paths = eventPaths;
+
 #ifdef DEBUG
   fprintf(stderr, "\n");
   fprintf(stderr, "FSEventStreamCallback fired!\n");
-  fprintf(stderr, "  numEvents: %d\n", numEvents);
+  fprintf(stderr, "  numEvents: %lu\n", numEvents);
+
+  for (size_t i = 0; i < numEvents; i++) {
+    fprintf(stderr, "  event path: %s\n", paths[i]);
+  }
+
   fprintf(stderr, "\n");
   fflush(stderr);
 #endif
-
-  char **paths = eventPaths;
 
   for (size_t i = 0; i < numEvents; i++) {
     fprintf(stdout, "%s", paths[i]);
@@ -167,6 +174,7 @@ int main(int argc, const char *argv[])
 {
   cli_settings_t _cli_settings, *settings = &_cli_settings;
   parse_cli_settings(argc, argv, settings);
+
   FSEventStreamContext *context = NULL;
   FSEventStreamRef stream;
   stream = FSEventStreamCreate(kCFAllocatorDefault,
@@ -179,7 +187,7 @@ int main(int argc, const char *argv[])
 
 #ifdef DEBUG
   FSEventStreamShow(stream);
-  fprintf(stderr, "\n\n");
+  fprintf(stderr, "\n");
   fflush(stderr);
 #endif
 
