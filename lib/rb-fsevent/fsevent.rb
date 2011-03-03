@@ -1,13 +1,24 @@
 class FSEvent
-  attr_reader :paths, :callback, :pipe
+  class << self
+    def watcher_path
+      @watcher_path ||= File.join(self.root_path, 'bin', 'fsevent_watch')
+    end
 
-  def watch(paths, &callback)
-    @paths    = paths.kind_of?(Enumerable) ? paths : [paths]
-    @callback = callback
+    protected
+
+    def root_path
+      @root_path ||= File.realpath(File.expand_path(File.join(File.dirname(__FILE__), '..', '..')))
+    end
+  end
+
+  attr_reader :paths, :callback
+
+  def watch(watch_paths, &block)
+    @paths    = watch_paths.kind_of?(Enumerable) ? watch_paths : [watch_paths]
+    @callback = block
   end
 
   def run
-    launch_bin
     listen
   end
 
@@ -17,17 +28,15 @@ class FSEvent
       pipe.close
     end
   rescue IOError
+  ensure
+    @pipe = false
   end
 
-private
-
-  def bin_path
-    File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'bin'))
+  def pipe
+    @pipe ||= IO.popen("#{self.class.watcher_path} #{shellescaped_paths}")
   end
 
-  def launch_bin
-    @pipe = IO.popen("#{bin_path}/fsevent_watch #{shellescaped_paths}")
-  end
+  private
 
   def listen
     while !pipe.eof?
@@ -61,5 +70,4 @@ private
 
     return str
   end
-
 end
