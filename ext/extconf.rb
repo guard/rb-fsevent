@@ -30,9 +30,11 @@ else
     -dead_strip -framework CoreServices
   }
 
-  gcc_opts = core_flags + ldflags + %w{
+  gcc_opts = core_flags + ldflags
+
+  gcc_opts += %w{
     -D DEBUG=true
-  }
+  } if ENV['FWDEBUG'] == "true"
 
   # Compile the actual fsevent_watch binary
   system "mkdir -p #{File.join(gem_root, 'bin')}"
