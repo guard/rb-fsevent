@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
 
 
@@ -68,10 +69,10 @@ void parse_cli_settings(int argc,
 {
   memset(cli_settings, 0, sizeof(cli_settings_t));
 
-  cli_settings->sinceWhen = kFSEventStreamEventIdSinceNow;
+  cli_settings->sinceWhen = 0xFFFFFFFFFFFFFFFFULL;
   cli_settings->latency = 0.5;
   cli_settings->flags = FWDefaultFSEventStreamCreateFlags;
-  cli_settings->paths = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+  cli_settings->paths = CFArrayCreateMutable(NULL, (CFIndex)0, &kCFTypeArrayCallBacks);
 
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "--since_when") == 0) {
@@ -94,7 +95,7 @@ void parse_cli_settings(int argc,
 #ifdef DEBUG
   fprintf(stderr, "cli_settings->since_when   %llu\n", cli_settings->sinceWhen);
   fprintf(stderr, "cli_settings->latency      %f\n", cli_settings->latency);
-  fprintf(stderr, "cli_settings->flags        %#0.8x\n", cli_settings->flags);
+  fprintf(stderr, "cli_settings->flags        %#.8x\n", cli_settings->flags);
   fprintf(stderr, "cli_settings->paths\n");
 
   long numpaths = CFArrayGetCount(cli_settings->paths);
