@@ -8,11 +8,8 @@
 
 
 // Default flags for FSEventStreamCreate
-// Despite the fact that this binary doesn't (at least currently) perform any IO
-// other than to stderr/stdout, I figure the "ignore self" option is a fairly
-// sane default for this.
 const FSEventStreamCreateFlags
-FWDefaultFSEventStreamCreateFlags = kFSEventStreamCreateFlagIgnoreSelf;
+FWDefaultFSEventStreamCreateFlags = kFSEventStreamCreateFlagNone;
 
 // Structure for storing metadata parsed from the commandline
 typedef struct _cli_settings_t {
@@ -41,19 +38,43 @@ static void   callback(ConstFSEventStreamRef streamRef,
 // Performing this ahead of time makes things less confusing, IMHO.
 void append_path(cli_settings_t *cli_settings, const char *path)
 {
+#ifdef DEBUG
+  fprintf(stderr, "\n");
+  fprintf(stderr, "append_path called for: %s\n", path);
+#endif
+
   char fullPath[PATH_MAX];
 
   if (realpath(path, fullPath) == NULL) {
+#ifdef DEBUG
+    fprintf(stderr, "  realpath not directly resolvable from path\n");
+#endif
+
     if (path[0] != '/') {
+#ifdef DEBUG
+      fprintf(stderr, "  passed path is not absolute\n");
+#endif
       size_t len;
       getcwd(fullPath, sizeof(fullPath));
+#ifdef DEBUG
+      fprintf(stderr, "  result of getcwd: %s\n", fullPath);
+#endif
       len = strlen(fullPath);
       fullPath[len] = '/';
       strlcpy(&fullPath[len + 1], path, sizeof(fullPath) - (len + 1));
     } else {
+#ifdef DEBUG
+      fprintf(stderr, "  assuming path does not YET exist\n");
+#endif
       strlcpy(fullPath, path, sizeof(fullPath));
     }
   }
+
+#ifdef DEBUG
+  fprintf(stderr, "  resolved path to: %s\n", fullPath);
+  fprintf(stderr, "\n");
+  fflush(stderr);
+#endif
 
   CFStringRef pathRef = CFStringCreateWithCString(kCFAllocatorDefault,
                                                   fullPath,
@@ -83,6 +104,8 @@ void parse_cli_settings(int argc,
       cli_settings->flags |= kFSEventStreamCreateFlagNoDefer;
     } else if (strcmp(argv[i], "--watch-root") == 0) {
       cli_settings->flags |= kFSEventStreamCreateFlagWatchRoot;
+    } else if (strcmp(argv[i], "--ignore-self") == 0) {
+      cli_settings->flags |= kFSEventStreamCreateFlagIgnoreSelf;
     } else {
       append_path(cli_settings, argv[i]);
     }
@@ -109,7 +132,7 @@ void parse_cli_settings(int argc,
     fprintf(stderr, "  %s\n", path);
   }
 
-  fprintf(stderr, "\n\n");
+  fprintf(stderr, "\n");
   fflush(stderr);
 #endif
 }
@@ -121,14 +144,22 @@ static void callback(ConstFSEventStreamRef streamRef,
                      const FSEventStreamEventFlags eventFlags[],
                      const FSEventStreamEventId eventIds[])
 {
+#ifdef DEBUG
+  fprintf(stderr, "\n");
+  fprintf(stderr, "FSEventStreamCallback fired!\n");
+  fprintf(stderr, "  numEvents: %d\n", numEvents);
+  fprintf(stderr, "\n");
+  fflush(stderr);
+#endif
+
   char **paths = eventPaths;
 
   for (size_t i = 0; i < numEvents; i++) {
-    printf("%s", paths[i]);
-    printf(":");
+    fprintf(stdout, "%s", paths[i]);
+    fprintf(stdout, ":");
   }
 
-  printf("\n");
+  fprintf(stdout, "\n");
   fflush(stdout);
 }
 
