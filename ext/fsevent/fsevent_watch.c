@@ -107,7 +107,11 @@ void parse_cli_settings(int argc,
     } else if (strcmp(argv[i], "--watch-root") == 0) {
       cli_settings->flags |= kFSEventStreamCreateFlagWatchRoot;
     } else if (strcmp(argv[i], "--ignore-self") == 0) {
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
       cli_settings->flags |= kFSEventStreamCreateFlagIgnoreSelf;
+#else
+      fprintf(stderr, "MacOSX10.6.sdk is required for --ignore-self\n");
+#endif
     } else {
       append_path(cli_settings, argv[i]);
     }
