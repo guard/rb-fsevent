@@ -41,31 +41,38 @@ class FSEvent
     @pipe = false
   end
 
-  def pipe
-    @pipe ||= IO.popen("#{self.class.watcher_path} #{shellescaped_paths}")
+  if RUBY_VERSION < '1.9'
+    def pipe
+      @pipe ||= IO.popen("#{self.class.watcher_path} #{shellescaped_paths}")
+    end
+
+    private
+
+    def shellescaped_paths
+      @paths.map {|path| shellescape(path)}.join(' ')
+    end
+
+    # for Ruby 1.8.6  support
+    def shellescape(str)
+      # An empty argument will be skipped, so return empty quotes.
+      return "''" if str.empty?
+
+      str = str.dup
+
+      # Process as a single byte sequence because not all shell
+      # implementations are multibyte aware.
+      str.gsub!(/([^A-Za-z0-9_\-.,:\/@\n])/n, "\\\\\\1")
+
+      # A LF cannot be escaped with a backslash because a backslash + LF
+      # combo is regarded as line continuation and simply ignored.
+      str.gsub!(/\n/, "'\n'")
+
+      return str
+    end
+  else
+    def pipe
+      @pipe ||= IO.popen([self.class.watcher_path] + @paths)
+    end
   end
 
-  private
-
-  def shellescaped_paths
-    @paths.map {|path| shellescape(path)}.join(' ')
-  end
-
-  # for Ruby 1.8.6  support
-  def shellescape(str)
-    # An empty argument will be skipped, so return empty quotes.
-    return "''" if str.empty?
-
-    str = str.dup
-
-    # Process as a single byte sequence because not all shell
-    # implementations are multibyte aware.
-    str.gsub!(/([^A-Za-z0-9_\-.,:\/@\n])/n, "\\\\\\1")
-
-    # A LF cannot be escaped with a backslash because a backslash + LF
-    # combo is regarded as line continuation and simply ignored.
-    str.gsub!(/\n/, "'\n'")
-
-    return str
-  end
 end
