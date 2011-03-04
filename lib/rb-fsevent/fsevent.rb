@@ -20,7 +20,15 @@ class FSEvent
   end
 
   def run
-    listen
+    while !pipe.eof?
+      if line = pipe.readline
+        modified_dir_paths = line.split(":").select { |dir| dir != "\n" }
+        callback.call(modified_dir_paths)
+      end
+    end
+  rescue Interrupt, IOError
+  ensure
+    stop
   end
 
   def stop
@@ -38,17 +46,6 @@ class FSEvent
   end
 
   private
-
-  def listen
-    while !pipe.eof?
-      if line = pipe.readline
-        modified_dir_paths = line.split(":").select { |dir| dir != "\n" }
-        callback.call(modified_dir_paths)
-      end
-    end
-  rescue Interrupt, IOError
-    stop
-  end
 
   def shellescaped_paths
     @paths.map {|path| shellescape(path)}.join(' ')
