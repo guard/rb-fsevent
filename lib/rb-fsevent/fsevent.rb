@@ -1,14 +1,15 @@
 class FSEvent
   class << self
-    def watcher_path
-      @watcher_path ||= File.join(self.root_path, 'bin', 'fsevent_watch')
-    end
-
-    protected
-
-    def root_path
-      @root_path ||= File.realpath(File.expand_path(File.join(File.dirname(__FILE__), '..', '..')))
-    end
+    class_eval <<-END
+      def root_path
+        "#{File.realpath(File.expand_path(File.join(File.dirname(__FILE__), '..', '..')))}"
+      end
+    END
+    class_eval <<-END
+      def watcher_path
+        "#{File.join(FSEvent.root_path, 'bin', 'fsevent_watch')}"
+      end
+    END
   end
 
   attr_reader :paths, :callback
