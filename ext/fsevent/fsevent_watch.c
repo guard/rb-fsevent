@@ -1,39 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 
 #include <CoreServices/CoreServices.h>
 
 
-// Default flags for FSEventStreamCreate
-const FSEventStreamCreateFlags
-FWDefaultFSEventStreamCreateFlags = kFSEventStreamCreateFlagNone;
-
 // Structure for storing metadata parsed from the commandline
-typedef struct _global_settings_t {
-  CFMutableArrayRef           paths;
+static struct {
   FSEventStreamEventId        sinceWhen;
   CFTimeInterval              latency;
   FSEventStreamCreateFlags    flags;
-} global_settings_t;
-
+  CFMutableArrayRef           paths;
+} config = {
+  (UInt64) kFSEventStreamEventIdSinceNow,
+  (double) 0.5,
+  (UInt32) kFSEventStreamCreateFlagNone,
+  NULL
+};
 
 // Prototypes
 static void         append_path(const char *path);
-static inline void  parse_cli_settings(int argc,
-                                       const char *argv[]);
-static inline void  init_global_settings();
-static void         callback(ConstFSEventStreamRef streamRef,
+static inline void  parse_cli_settings(int argc, const char *argv[]);
+static void         callback(FSEventStreamRef streamRef,
                              void *clientCallBackInfo,
                              size_t numEvents,
                              void *eventPaths,
                              const FSEventStreamEventFlags eventFlags[],
                              const FSEventStreamEventId eventIds[]);
-
-
-// define global settings structure
-global_settings_t _global_settings, *settings = &_global_settings;
 
 
 // Resolve a path and append it to the CLI settings structure
@@ -82,26 +75,29 @@ static void append_path(const char *path)
   CFStringRef pathRef = CFStringCreateWithCString(kCFAllocatorDefault,
                                                   fullPath,
                                                   kCFStringEncodingUTF8);
-  CFArrayAppendValue(settings->paths, pathRef);
+  CFArrayAppendValue(config.paths, pathRef);
   CFRelease(pathRef);
 }
 
 // Parse commandline settings
-static inline void parse_cli_settings(int argc,
-                                      const char *argv[])
+static inline void parse_cli_settings(int argc, const char *argv[])
 {
+  config.paths = CFArrayCreateMutable(NULL,
+                                      (CFIndex)0,
+                                      &kCFTypeArrayCallBacks);
+
   for (int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "--since_when") == 0) {
-      settings->sinceWhen = strtoull(argv[++i], NULL, 0);
+    if (strcmp(argv[i], "--since-when") == 0) {
+      config.sinceWhen = strtoull(argv[++i], NULL, 0);
     } else if (strcmp(argv[i], "--latency") == 0) {
-      settings->latency = strtod(argv[++i], NULL);
+      config.latency = strtod(argv[++i], NULL);
     } else if (strcmp(argv[i], "--no-defer") == 0) {
-      settings->flags |= kFSEventStreamCreateFlagNoDefer;
+      config.flags |= kFSEventStreamCreateFlagNoDefer;
     } else if (strcmp(argv[i], "--watch-root") == 0) {
-      settings->flags |= kFSEventStreamCreateFlagWatchRoot;
+      config.flags |= kFSEventStreamCreateFlagWatchRoot;
     } else if (strcmp(argv[i], "--ignore-self") == 0) {
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
-      settings->flags |= kFSEventStreamCreateFlagIgnoreSelf;
+      config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
 #else
       fprintf(stderr, "MacOSX10.6.sdk is required for --ignore-self\n");
 #endif
@@ -110,21 +106,21 @@ static inline void parse_cli_settings(int argc,
     }
   }
 
-  if (CFArrayGetCount(settings->paths) == 0) {
+  if (CFArrayGetCount(config.paths) == 0) {
     append_path(".");
   }
 
 #ifdef DEBUG
-  fprintf(stderr, "settings->since_when   %llu\n", settings->sinceWhen);
-  fprintf(stderr, "settings->latency      %f\n", settings->latency);
-  fprintf(stderr, "settings->flags        %#.8x\n", settings->flags);
-  fprintf(stderr, "settings->paths\n");
+  fprintf(stderr, "config.sinceWhen    %llu\n", config.sinceWhen);
+  fprintf(stderr, "config.latency      %f\n", config.latency);
+  fprintf(stderr, "config.flags        %#.8x\n", config.flags);
+  fprintf(stderr, "config.paths\n");
 
-  long numpaths = CFArrayGetCount(settings->paths);
+  long numpaths = CFArrayGetCount(config.paths);
 
   for (long i = 0; i < numpaths; i++) {
     char path[PATH_MAX];
-    CFStringGetCString(CFArrayGetValueAtIndex(settings->paths, i),
+    CFStringGetCString(CFArrayGetValueAtIndex(config.paths, i),
                        path,
                        PATH_MAX,
                        kCFStringEncodingUTF8);
@@ -136,7 +132,7 @@ static inline void parse_cli_settings(int argc,
 #endif
 }
 
-static void callback(ConstFSEventStreamRef streamRef,
+static void callback(FSEventStreamRef streamRef,
                      void *clientCallBackInfo,
                      size_t numEvents,
                      void *eventPaths,
@@ -167,31 +163,19 @@ static void callback(ConstFSEventStreamRef streamRef,
   fflush(stdout);
 }
 
-static inline void init_global_settings(){
-  memset(settings, 0, sizeof(global_settings_t));
-
-  settings->sinceWhen = 0xFFFFFFFFFFFFFFFFULL;
-  settings->latency = 0.5;
-  settings->flags = FWDefaultFSEventStreamCreateFlags;
-  settings->paths = CFArrayCreateMutable(NULL,
-                                         (CFIndex)0,
-                                         &kCFTypeArrayCallBacks);
-}
-
 int main(int argc, const char *argv[])
 {
-  init_global_settings();
   parse_cli_settings(argc, argv);
 
-  FSEventStreamContext *context = NULL;
+  FSEventStreamContext context = {0, NULL, NULL, NULL, NULL};
   FSEventStreamRef stream;
   stream = FSEventStreamCreate(kCFAllocatorDefault,
-                               callback,
-                               context,
-                               settings->paths,
-                               settings->sinceWhen,
-                               settings->latency,
-                               settings->flags);
+                               (FSEventStreamCallback)&callback,
+                               &context,
+                               config.paths,
+                               config.sinceWhen,
+                               config.latency,
+                               config.flags);
 
 #ifdef DEBUG
   FSEventStreamShow(stream);
@@ -204,6 +188,8 @@ int main(int argc, const char *argv[])
                                    kCFRunLoopDefaultMode);
   FSEventStreamStart(stream);
   CFRunLoopRun();
+  FSEventStreamFlushSync(stream);
+  FSEventStreamStop(stream);
 
-  return 2;
+  return 0;
 }
