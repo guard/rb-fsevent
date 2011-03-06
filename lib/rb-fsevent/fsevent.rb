@@ -15,7 +15,7 @@ class FSEvent
   attr_reader :paths, :callback
 
   def watch(watch_paths, &block)
-    @paths    = watch_paths.kind_of?(Enumerable) ? watch_paths : [watch_paths]
+    @paths    = watch_paths.kind_of?(Array) ? watch_paths : [watch_paths]
     @callback = block
   end
 
