@@ -5,7 +5,7 @@ describe FSEvent do
   before(:each) do
     @results = []
     @fsevent = FSEvent.new
-    @fsevent.watch @fixture_path.to_s do |paths|
+    @fsevent.watch @fixture_path.to_s, {:latency => 0.5} do |paths|
       @results += paths
     end
   end

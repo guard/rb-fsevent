@@ -14,9 +14,17 @@ class FSEvent
 
   attr_reader :paths, :callback
 
-  def watch(watch_paths, &block)
-    @paths    = watch_paths.kind_of?(Array) ? watch_paths : [watch_paths]
-    @callback = block
+  def watch(watch_paths, options=nil, &block)
+    @paths      = watch_paths.kind_of?(Array) ? watch_paths : [watch_paths]
+    @callback   = block
+
+    if options.kind_of?(Hash)
+      @options  = parse_options(options)
+    elsif options.kind_of?(Array)
+      @options  = options
+    else
+      @options  = []
+    end
   end
 
   def run
@@ -43,10 +51,14 @@ class FSEvent
 
   if RUBY_VERSION < '1.9'
     def pipe
-      @pipe ||= IO.popen("#{self.class.watcher_path} #{shellescaped_paths}")
+      @pipe ||= IO.popen("#{self.class.watcher_path} #{options_string} #{shellescaped_paths}")
     end
 
     private
+
+    def options_string
+      @options.join(' ')
+    end
 
     def shellescaped_paths
       @paths.map {|path| shellescape(path)}.join(' ')
@@ -71,8 +83,20 @@ class FSEvent
     end
   else
     def pipe
-      @pipe ||= IO.popen([self.class.watcher_path] + @paths)
+      @pipe ||= IO.popen([self.class.watcher_path] + @options + @paths)
     end
+  end
+
+  private
+
+  def parse_options(options={})
+    opts = []
+    opts.concat(['--since-when', options[:since_when]]) if options[:since_when]
+    opts.concat(['--latency', options[:latency]]) if options[:latency]
+    opts.push('--no-defer') if options[:no_defer]
+    opts.push('--watch-root') if options[:watch_root]
+    # ruby 1.9's IO.popen(array-of-stuff) syntax requires all items to be strings
+    opts.map {|opt| "#{opt}"}
   end
 
 end
