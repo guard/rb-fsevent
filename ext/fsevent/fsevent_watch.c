@@ -13,7 +13,7 @@ static struct {
   CFMutableArrayRef           paths;
 } config = {
   (UInt64) kFSEventStreamEventIdSinceNow,
-  (double) 0.5,
+  (double) 0.3,
   (UInt32) kFSEventStreamCreateFlagNone,
   NULL
 };
