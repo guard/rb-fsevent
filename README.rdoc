@@ -106,62 +106,127 @@ WARNING: passing in 0 as the parameter to :since_when will return events for eve
 
 If the gem is installed with the environment variable FWDEBUG set to the string "true", then fsevent_watch will be built with its various DEBUG sections defined, and the output to STDERR is truly verbose (and hopefully helpful debugging your application and not just fsevent_watch itself):
 
-    append_path called for: /tmp/moo/cow
+    append_path called for: /tmp/moo/cow/
       resolved path to: /private/tmp/moo/cow
 
     config.sinceWhen    18446744073709551615
-    config.latency      4.000000
-    config.flags        0x00000004
+    config.latency      0.300000
+    config.flags        00000000
     config.paths
       /private/tmp/moo/cow
 
-    FSEventStreamRef @ 0x1001085a0:
+    FSEventStreamRef @ 0x100108540:
        allocator = 0x7fff705a4ee0
-       callback = 0x10000159e
+       callback = 0x10000151e
        context = {0, 0x0, 0x0, 0x0, 0x0}
        numPathsToWatch = 1
        pathsToWatch = 0x7fff705a4ee0
             pathsToWatch[0] = '/private/tmp/moo/cow'
        latestEventId = -1
-       latency = 4000000 (microseconds)
-       flags = 0x00000004
+       latency = 300000 (microseconds)
+       flags = 0x00000000
        runLoop = 0x0
        runLoopMode = 0x0
+
 
     FSEventStreamCallback fired!
       numEvents: 32
       event path: /private/tmp/moo/cow/1/a/
+      event flags: 00000000
+      event ID: 1023767
       event path: /private/tmp/moo/cow/1/b/
+      event flags: 00000000
+      event ID: 1023782
       event path: /private/tmp/moo/cow/1/c/
+      event flags: 00000000
+      event ID: 1023797
       event path: /private/tmp/moo/cow/1/d/
+      event flags: 00000000
+      event ID: 1023812
       event path: /private/tmp/moo/cow/1/e/
+      event flags: 00000000
+      event ID: 1023827
       event path: /private/tmp/moo/cow/1/f/
+      event flags: 00000000
+      event ID: 1023842
       event path: /private/tmp/moo/cow/1/g/
+      event flags: 00000000
+      event ID: 1023857
       event path: /private/tmp/moo/cow/1/h/
+      event flags: 00000000
+      event ID: 1023872
       event path: /private/tmp/moo/cow/1/i/
+      event flags: 00000000
+      event ID: 1023887
       event path: /private/tmp/moo/cow/1/j/
+      event flags: 00000000
+      event ID: 1023902
       event path: /private/tmp/moo/cow/1/k/
+      event flags: 00000000
+      event ID: 1023917
       event path: /private/tmp/moo/cow/1/l/
+      event flags: 00000000
+      event ID: 1023932
       event path: /private/tmp/moo/cow/1/m/
+      event flags: 00000000
+      event ID: 1023947
       event path: /private/tmp/moo/cow/1/n/
+      event flags: 00000000
+      event ID: 1023962
       event path: /private/tmp/moo/cow/1/o/
+      event flags: 00000000
+      event ID: 1023977
       event path: /private/tmp/moo/cow/1/p/
+      event flags: 00000000
+      event ID: 1023992
       event path: /private/tmp/moo/cow/1/q/
+      event flags: 00000000
+      event ID: 1024007
       event path: /private/tmp/moo/cow/1/r/
+      event flags: 00000000
+      event ID: 1024022
       event path: /private/tmp/moo/cow/1/s/
+      event flags: 00000000
+      event ID: 1024037
       event path: /private/tmp/moo/cow/1/t/
+      event flags: 00000000
+      event ID: 1024052
       event path: /private/tmp/moo/cow/1/u/
+      event flags: 00000000
+      event ID: 1024067
       event path: /private/tmp/moo/cow/1/v/
+      event flags: 00000000
+      event ID: 1024082
       event path: /private/tmp/moo/cow/1/w/
+      event flags: 00000000
+      event ID: 1024097
       event path: /private/tmp/moo/cow/1/x/
+      event flags: 00000000
+      event ID: 1024112
       event path: /private/tmp/moo/cow/1/y/
-      event path: /private/tmp/moo/cow/1/
+      event flags: 00000000
+      event ID: 1024127
       event path: /private/tmp/moo/cow/1/z/
+      event flags: 00000000
+      event ID: 1024142
+      event path: /private/tmp/moo/cow/1/
+      event flags: 00000000
+      event ID: 1024145
       event path: /private/tmp/moo/cow/2/a/
+      event flags: 00000000
+      event ID: 1024160
       event path: /private/tmp/moo/cow/2/b/
+      event flags: 00000000
+      event ID: 1024175
       event path: /private/tmp/moo/cow/2/c/
+      event flags: 00000000
+      event ID: 1024190
       event path: /private/tmp/moo/cow/2/d/
+      event flags: 00000000
+      event ID: 1024205
       event path: /private/tmp/moo/cow/2/e/
+      event flags: 00000000
+      event ID: 1024220
 
 == Note about FFI
 
