@@ -148,6 +148,8 @@ static void callback(FSEventStreamRef streamRef,
 
   for (size_t i = 0; i < numEvents; i++) {
     fprintf(stderr, "  event path: %s\n", paths[i]);
+    fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
+    fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
   }
 
   fprintf(stderr, "\n");
