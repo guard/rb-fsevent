@@ -178,4 +178,5 @@ you make.
 == Authors
 
 {Thibaud Guillaume-Gentil}[http://github.com/thibaudgg]
+
 {Travis Tilley}[http://github.com/ttilley]
