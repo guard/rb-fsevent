@@ -5,7 +5,7 @@ Very simple & usable Mac OSX FSEvents API
 - RubyCocoa not required!
 - Signals are working
 - Tested on MRI 1.8.6, 1.8.7 & 1.9.2
-- Tested on JRuby 1.6.0 RC3, with experimental (but sufficient) extconf/mkmf support
+- Tested on JRuby-head, with experimental (but sufficient) extconf/mkmf support
 
 == Install
 
@@ -247,7 +247,7 @@ The list of tested RVM targets is currently:
 
     %w[1.8.6 1.8.7 1.9.2 jruby-head]
 
-Development note: As of my last attempt to do so, jruby-head's cext support will NOT compile, as-is, using the xcode4 GM1 seed. Simply editing the makefile to point -isysroot to '/' rather than depend on an SDK specific environment and switching the minimum OS to 10.6 was enough to get past this. Making these changes within the context of an RVM installed ruby, however, requires creating a patch and then informing rvm that it needs to apply this patch pre-build.
+Development note: As of my last attempt to do so, jruby-head's cext support will NOT compile, as-is, using xcode 4.0.1. Simply editing the makefile to point -isysroot to '/' rather than depend on an SDK specific environment and switching the minimum OS to 10.6 was enough to get past this. Making these changes within the context of an RVM installed ruby, however, requires creating a patch and then informing rvm that it needs to apply this patch pre-build.
 
 If you have xcode4, and jruby-head has not yet been fixed to allow unmodified compilation, then it's perfectly understandable and acceptable to just remove jruby-head as a testing target. This is especially true considering that it requires an unreleased version of JRuby to begin with.
 
@@ -255,3 +255,4 @@ If you have xcode4, and jruby-head has not yet been fixed to allow unmodified co
 
 - {Thibaud Guillaume-Gentil}[http://github.com/thibaudgg]
 - {Travis Tilley}[http://github.com/ttilley]
+
