@@ -5,6 +5,13 @@ create_makefile('none')
 if `uname -s`.chomp != 'Darwin'
   puts "Warning! Only Darwin (Mac OS X) systems are supported, nothing will be compiled"
 else
+  begin
+    xcode_path = %x[xcode-select -print-path].to_s.strip!
+  rescue Errno::ENOENT
+  end
+
+  raise "Could not find a suitable Xcode installation" unless xcode_path
+
   gem_root       = File.expand_path(File.join('..'))
   darwin_version = `uname -r`.to_i
   sdk_version    = { 9 => '10.5', 10 => '10.6', 11 => '10.7' }[darwin_version]
@@ -12,7 +19,7 @@ else
   raise "Only Darwin systems greater than 8 (Mac OS X 10.5+) are supported" unless sdk_version
 
   core_flags = %W{
-    -isysroot /Developer/SDKs/MacOSX#{sdk_version}.sdk
+    -isysroot #{xcode_path}/SDKs/MacOSX#{sdk_version}.sdk
     -mmacosx-version-min=#{sdk_version} -mdynamic-no-pic -std=gnu99
   }
 
