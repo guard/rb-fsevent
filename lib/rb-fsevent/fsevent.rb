@@ -28,7 +28,8 @@ class FSEvent
   end
 
   def run
-    while !pipe.eof?
+    @running = true
+    while @running && !pipe.eof?
       if line = pipe.readline
         modified_dir_paths = line.split(":").select { |dir| dir != "\n" }
         callback.call(modified_dir_paths)
@@ -46,7 +47,7 @@ class FSEvent
     end
   rescue IOError
   ensure
-    @pipe = false
+    @running = false
   end
 
   if RUBY_VERSION < '1.9'
