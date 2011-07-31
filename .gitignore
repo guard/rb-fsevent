@@ -12,3 +12,7 @@ Desktop DB
 Desktop DF
 /bin/fsevent_watch
 /ext/Makefile
+
+## editor/IDE
+.idea
+
