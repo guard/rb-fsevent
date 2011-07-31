@@ -167,6 +167,9 @@ static void callback(FSEventStreamRef streamRef,
 
 int main(int argc, const char *argv[])
 {
+  // become our own process group. see rb-fsevent issue #17
+  if (setpgid(0,0) < 0) return 1;
+  
   parse_cli_settings(argc, argv);
 
   FSEventStreamContext context = {0, NULL, NULL, NULL, NULL};
