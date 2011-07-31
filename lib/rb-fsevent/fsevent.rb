@@ -47,7 +47,7 @@ class FSEvent
     end
   rescue IOError
   ensure
-    @running = false
+    @pipe = @running = nil
   end
 
   if RUBY_VERSION < '1.9'
