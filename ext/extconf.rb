@@ -42,6 +42,10 @@ else
   gcc_opts += %w{
     -D DEBUG=true
   } if ENV['FWDEBUG'] == "true"
+  
+  gcc_opts += %W{
+    -D SAFE_SETPGID=true
+  } if RUBY_VERSION >= "1.9" || defined?(JRUBY_VERSION)
 
   compile_command = "CFLAGS='#{cflags.join(' ')} #{wflags.join(' ')}' /usr/bin/gcc #{gcc_opts.join(' ')} -o '#{gem_root}/bin/fsevent_watch' fsevent/fsevent_watch.c"
 
