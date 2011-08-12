@@ -29,7 +29,9 @@ class FSEvent
 
   def run
     @running = true
-    while @running && !pipe.eof?
+    # please note the use of IO::select() here, as it is used specifically to
+    # preserve correct signal handling behavior in ruby 1.8.
+    while @running && IO::select([pipe], nil, nil, nil)
       if line = pipe.readline
         modified_dir_paths = line.split(":").select { |dir| dir != "\n" }
         callback.call(modified_dir_paths)

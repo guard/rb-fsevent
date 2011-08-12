@@ -188,14 +188,13 @@ int main(int argc, const char *argv[])
    *
    * hindsight is 20/20 addition: if you're single-threaded and blocking on IO
    * with a subprocess, then handlers for deferrable signals might not get run
-   * when you expect them to.
+   * when you expect them to. In the case of Ruby 1.8, that means making use of
+   * IO::select, which will preserve correct signal handling behavior.
    */
-#ifdef SAFE_SETPGID
   if (setpgid(0,0) < 0) {
     fprintf(stderr, "Unable to set new process group.\n");
     return 1;
   }
-#endif
 
   parse_cli_settings(argc, argv);
 
