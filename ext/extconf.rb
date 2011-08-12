@@ -2,6 +2,8 @@
 require 'mkmf'
 create_makefile('none')
 
+# TODO: determine whether we really need to be working around instead of with mkmf
+
 if `uname -s`.chomp != 'Darwin'
   puts "Warning! Only Darwin (Mac OS X) systems are supported, nothing will be compiled"
 else
@@ -37,13 +39,15 @@ else
     -dead_strip -framework CoreServices
   }
 
-  gcc_opts = core_flags + ldflags
+  cc_opts = core_flags + ldflags
 
-  gcc_opts += %w{
+  cc_opts += %w{
     -D DEBUG=true
   } if ENV['FWDEBUG'] == "true"
+  
+  cc_bin = `which clang || which gcc`.to_s.strip!
 
-  compile_command = "CFLAGS='#{cflags.join(' ')} #{wflags.join(' ')}' /usr/bin/gcc #{gcc_opts.join(' ')} -o '#{gem_root}/bin/fsevent_watch' fsevent/fsevent_watch.c"
+  compile_command = "CFLAGS='#{cflags.join(' ')} #{wflags.join(' ')}' #{cc_bin} #{cc_opts.join(' ')} -o '#{gem_root}/bin/fsevent_watch' fsevent/fsevent_watch.c"
 
   STDERR.puts(compile_command)
 
