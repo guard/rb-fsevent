@@ -3,9 +3,9 @@
 Very simple & usable Mac OSX FSEvents API
 
 - RubyCocoa not required!
-- Signals are working
-- Tested on MRI 1.8.6, 1.8.7 & 1.9.2
-- Tested on JRuby-head, with experimental (but sufficient) extconf/mkmf support
+- Signals are working (really)
+- Tested on MRI 1.8.7 & 1.9.2
+- Tested on JRuby 1.6.3
 
 == Install
 
