@@ -7,21 +7,15 @@ HAPPY_PLACE = File.expand_path('..')
 namespace :xcode do
   $target = 'fsevent_watch'
   $configuration = ENV['FWDEBUG'] ? 'Debug' : 'Release'
-  
-  $overrides = [
-    "DSTROOT='#{HAPPY_PLACE}'",
-    "INSTALL_PATH='/bin'"
-  ].join(' ')
-  
-  
-  def xcb(action)
+    
+  def xcb(action, extra='')
     command = [
       XCODEBUILD,
       "-target", $target,
       "-configuration", $configuration,
       action,
       "-xcconfig", XCCONFIG,
-      $overrides
+      extra
     ].join(' ')
     
     Dir.chdir 'fsevent_watch' do
@@ -43,7 +37,7 @@ namespace :xcode do
   
   desc 'run xcodebuild install'
   task :install => :build do
-    xcb 'install'
+    xcb 'install', "DEPLOYMENT_LOCATION='YES'"
   end
   
   task :remove_turds do

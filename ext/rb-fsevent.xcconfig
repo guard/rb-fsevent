@@ -1,10 +1,15 @@
-// settings in this file will override those defined in the xcode project,
-// but not those passed directly to xcodebuild by rake (DSTROOT and
-// INSTALL_PATH).
+// settings in this file will override those defined in the xcode project
 
 // - deployment -
 INSTALL_MODE_FLAG = u+w,go-w,a+rX
 MACOSX_DEPLOYMENT_TARGET = 
+DSTROOT = ../../
+INSTALL_PATH = /bin
+SKIP_INSTALL = NO
+
+// - build locations -
+SYMROOT = build
+OBJROOT = $(SYMROOT)
 
 // - architectures -
 ARCHS = $(NATIVE_ARCH_ACTUAL)
