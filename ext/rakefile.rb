@@ -2,7 +2,6 @@
 
 XCODEBUILD = '/usr/bin/xcodebuild'
 XCCONFIG = File.expand_path('rb-fsevent.xcconfig')
-HAPPY_PLACE = File.expand_path('..')
 
 namespace :xcode do
   $target = 'fsevent_watch'
