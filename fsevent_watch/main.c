@@ -107,6 +107,12 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 #else
       fprintf(stderr, "MacOSX10.6.sdk is required for --ignore-self\n");
 #endif
+    } else if (strcmp(argv[i], "--file-events") == 0) {
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
+      config.flags |= kFSEventStreamCreateFlagFileEvents;
+#else
+      fprintf(stderr, "MacOSX10.7.sdk is required for --file-events\n");
+#endif
     } else {
       append_path(argv[i]);
     }
