@@ -81,7 +81,6 @@ static void append_path(const char *path)
 #ifdef DEBUG
   fprintf(stderr, "  resolved path to: %s\n", fullPath);
   fprintf(stderr, "\n");
-  fflush(stderr);
 #endif
   
   CFStringRef pathRef = CFStringCreateWithCString(kCFAllocatorDefault,
@@ -155,7 +154,6 @@ static inline void parse_cli_settings(int argc, const char *argv[])
   }
   
   fprintf(stderr, "\n");
-  fflush(stderr);
 #endif
 }
 
@@ -209,7 +207,6 @@ static void callback(FSEventStreamRef streamRef,
 //  }
 //  
 //  fprintf(stderr, "\n");
-//  fflush(stderr);
 //#endif
   
   if (config.format == kFSEventWatchOutputFormatClassic) {
@@ -267,7 +264,6 @@ int main(int argc, const char *argv[])
 #ifdef DEBUG
   FSEventStreamShow(stream);
   fprintf(stderr, "\n");
-  fflush(stderr);
 #endif
   
   FSEventStreamScheduleWithRunLoop(stream,
