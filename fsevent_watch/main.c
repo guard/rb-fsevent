@@ -11,8 +11,8 @@
 #include <CoreServices/CoreServices.h>
 
 enum FSEventWatchOutputFormat {
-  kFSEventWatchOutputFormatClassic = 0x00000000,
-  kFSEventWatchOutputFormatNIW = 0x00000001
+  kFSEventWatchOutputFormatClassic,
+  kFSEventWatchOutputFormatNIW
 };
 
 // Structure for storing metadata parsed from the commandline
