@@ -10,18 +10,24 @@
 
 #include <CoreServices/CoreServices.h>
 
+enum FSEventWatchOutputFormat {
+  kFSEventWatchOutputFormatClassic = 0x00000000,
+  kFSEventWatchOutputFormatNIW = 0x00000001
+};
 
 // Structure for storing metadata parsed from the commandline
 static struct {
-  FSEventStreamEventId        sinceWhen;
-  CFTimeInterval              latency;
-  FSEventStreamCreateFlags    flags;
-  CFMutableArrayRef           paths;
+  FSEventStreamEventId            sinceWhen;
+  CFTimeInterval                  latency;
+  FSEventStreamCreateFlags        flags;
+  CFMutableArrayRef               paths;
+  enum FSEventWatchOutputFormat   format;
 } config = {
   (UInt64) kFSEventStreamEventIdSinceNow,
   (double) 0.3,
   (UInt32) kFSEventStreamCreateFlagNone,
-  NULL
+  NULL,
+  kFSEventWatchOutputFormatClassic
 };
 
 // Prototypes
@@ -107,6 +113,21 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 #else
       fprintf(stderr, "MacOSX10.6.sdk is required for --ignore-self\n");
 #endif
+    } else if (strcmp(argv[i], "--file-events") == 0) {
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
+      config.flags |= kFSEventStreamCreateFlagFileEvents;
+#else
+      fprintf(stderr, "MacOSX10.7.sdk is required for --file-events\n");
+#endif
+    } else if (strcmp(argv[i], "--format") == 0) {
+      const char *format = argv[++i];
+      if (strcmp(format, "classic") == 0) {
+        config.format = kFSEventWatchOutputFormatClassic;
+      } else if (strcmp(format, "niw") == 0) {
+        config.format = kFSEventWatchOutputFormatNIW;
+      } else {
+        fprintf(stderr, "Unknown format %s, falling back to default\n", format);
+      }
     } else {
       append_path(argv[i]);
     }
@@ -138,6 +159,31 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 #endif
 }
 
+// original output format for rb-fsevent
+static void classic_output_format(size_t numEvents,
+                                  char **paths)
+{
+  for (size_t i = 0; i < numEvents; i++) {
+    fprintf(stdout, "%s:", paths[i]);
+  }
+  fprintf(stdout, "\n");
+}
+
+// output format used in the Yoshimasa Niwa branch of rb-fsevent
+static void niw_output_format(size_t numEvents,
+                              char **paths,
+                              const FSEventStreamEventFlags eventFlags[],
+                              const FSEventStreamEventId eventIds[])
+{
+  for (size_t i = 0; i < numEvents; i++) {
+    fprintf(stdout, "%lu:%llu:%s\n",
+            (unsigned long)eventFlags[i],
+            (unsigned long long)eventIds[i],
+            paths[i]);
+  }
+  fprintf(stdout, "\n");
+}
+
 static void callback(FSEventStreamRef streamRef,
                      void *clientCallBackInfo,
                      size_t numEvents,
@@ -146,28 +192,32 @@ static void callback(FSEventStreamRef streamRef,
                      const FSEventStreamEventId eventIds[])
 {
   char **paths = eventPaths;
+
+// commented out, at least for the moment, so that it doesn't inadvertently
+// make reading formatted output painful. it might make sense to even make this
+// its own output format.
+//
+//#ifdef DEBUG
+//  fprintf(stderr, "\n");
+//  fprintf(stderr, "FSEventStreamCallback fired!\n");
+//  fprintf(stderr, "  numEvents: %lu\n", numEvents);
+//  
+//  for (size_t i = 0; i < numEvents; i++) {
+//    fprintf(stderr, "  event path: %s\n", paths[i]);
+//    fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
+//    fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
+//  }
+//  
+//  fprintf(stderr, "\n");
+//  fflush(stderr);
+//#endif
   
-#ifdef DEBUG
-  fprintf(stderr, "\n");
-  fprintf(stderr, "FSEventStreamCallback fired!\n");
-  fprintf(stderr, "  numEvents: %lu\n", numEvents);
-  
-  for (size_t i = 0; i < numEvents; i++) {
-    fprintf(stderr, "  event path: %s\n", paths[i]);
-    fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
-    fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
+  if (config.format == kFSEventWatchOutputFormatClassic) {
+    classic_output_format(numEvents, paths);
+  } else if (config.format == kFSEventWatchOutputFormatNIW) {
+    niw_output_format(numEvents, paths, eventFlags, eventIds);
   }
-  
-  fprintf(stderr, "\n");
-  fflush(stderr);
-#endif
-  
-  for (size_t i = 0; i < numEvents; i++) {
-    fprintf(stdout, "%s", paths[i]);
-    fprintf(stdout, ":");
-  }
-  
-  fprintf(stdout, "\n");
+    
   fflush(stdout);
 }
 
