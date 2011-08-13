@@ -19,6 +19,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency  'guard-rspec', '~> 0.1.9'
 
   s.files        = Dir.glob('{lib,ext}/**/*') + %w[LICENSE README.rdoc]
-  s.extensions   = ['ext/extconf.rb']
+  s.extensions   = ['ext/rakefile.rb']
   s.require_path = 'lib'
 end
