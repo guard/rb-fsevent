@@ -140,6 +140,11 @@
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
+				WARNING_CFLAGS = (
+					"-Wall",
+					"-Wextra",
+					"-fcatch-undefined-behavior",
+				);
 			};
 			name = Debug;
 		};
