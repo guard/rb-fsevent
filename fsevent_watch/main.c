@@ -157,7 +157,14 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 #ifdef DEBUG
   fprintf(stderr, "config.sinceWhen    %llu\n", config.sinceWhen);
   fprintf(stderr, "config.latency      %f\n", config.latency);
+
+// STFU clang
+#if __LP64__
   fprintf(stderr, "config.flags        %#.8x\n", config.flags);
+#else
+  fprintf(stderr, "config.flags        %#.8lx\n", config.flags);
+#endif
+
   fprintf(stderr, "config.paths\n");
   
   long numpaths = CFArrayGetCount(config.paths);
