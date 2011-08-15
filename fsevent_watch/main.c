@@ -4,12 +4,7 @@
 //  Copyright (c) 2011 Travis Tilley. All rights reserved.
 //
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
 #include <CoreServices/CoreServices.h>
-
 #include "compat.h"
 
 enum FSEventWatchOutputFormat {
