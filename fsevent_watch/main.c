@@ -93,6 +93,15 @@ static void append_path(const char *path)
 // Parse commandline settings
 static inline void parse_cli_settings(int argc, const char *argv[])
 {
+  // runtime os version detection
+  SInt32 osMajorVersion, osMinorVersion;
+  if (!(Gestalt(gestaltSystemVersionMajor, &osMajorVersion) == noErr)) {
+    osMajorVersion = 0;
+  }
+  if (!(Gestalt(gestaltSystemVersionMinor, &osMinorVersion) == noErr)) {
+    osMinorVersion = 0;
+  }
+
   config.paths = CFArrayCreateMutable(NULL,
                                       (CFIndex)0,
                                       &kCFTypeArrayCallBacks);
@@ -108,15 +117,27 @@ static inline void parse_cli_settings(int argc, const char *argv[])
       config.flags |= kFSEventStreamCreateFlagWatchRoot;
     } else if (strcmp(argv[i], "--ignore-self") == 0) {
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
-      config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
+      if ((osMajorVersion == 10) & (osMinorVersion >= 6)) {
+        config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
+      } else {
+        fprintf(stderr, "MacOSX 10.6 or later is required for --ignore-self\n");
+        exit(EXIT_FAILURE);
+      }
 #else
-      fprintf(stderr, "MacOSX10.6.sdk is required for --ignore-self\n");
+      fprintf(stderr, "MacOSX 10.6 SDK or later required to compile with --ignore-self support\n");
+      exit(EXIT_FAILURE);
 #endif
     } else if (strcmp(argv[i], "--file-events") == 0) {
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-      config.flags |= kFSEventStreamCreateFlagFileEvents;
+      if ((osMajorVersion == 10) & (osMinorVersion >= 7)) {
+        config.flags |= kFSEventStreamCreateFlagFileEvents;
+      } else {
+        fprintf(stderr, "MacOSX 10.7 or later required for --file-events\n");
+        exit(EXIT_FAILURE);
+      }
 #else
-      fprintf(stderr, "MacOSX10.7.sdk is required for --file-events\n");
+      fprintf(stderr, "MacOSX 10.7 SDK or later required to compile with --file-events support\n");
+      exit(EXIT_FAILURE);
 #endif
     } else if (strcmp(argv[i], "--format") == 0) {
       const char *format = argv[++i];
