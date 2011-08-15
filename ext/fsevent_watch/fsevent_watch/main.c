@@ -4,41 +4,9 @@
 //  Copyright (c) 2011 Travis Tilley. All rights reserved.
 //
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
 #include <CoreServices/CoreServices.h>
-
-enum FSEventWatchOutputFormat {
-  kFSEventWatchOutputFormatClassic,
-  kFSEventWatchOutputFormatNIW
-};
-
-// Structure for storing metadata parsed from the commandline
-static struct {
-  FSEventStreamEventId            sinceWhen;
-  CFTimeInterval                  latency;
-  FSEventStreamCreateFlags        flags;
-  CFMutableArrayRef               paths;
-  enum FSEventWatchOutputFormat   format;
-} config = {
-  (UInt64) kFSEventStreamEventIdSinceNow,
-  (double) 0.3,
-  (UInt32) kFSEventStreamCreateFlagNone,
-  NULL,
-  kFSEventWatchOutputFormatClassic
-};
-
-// Prototypes
-static void         append_path(const char *path);
-static inline void  parse_cli_settings(int argc, const char *argv[]);
-static void         callback(FSEventStreamRef streamRef,
-                             void *clientCallBackInfo,
-                             size_t numEvents,
-                             void *eventPaths,
-                             const FSEventStreamEventFlags eventFlags[],
-                             const FSEventStreamEventId eventIds[]);
+#include "compat.h"
+#include "fsevent_watch.h"
 
 
 // Resolve a path and append it to the CLI settings structure
@@ -102,6 +70,11 @@ static inline void parse_cli_settings(int argc, const char *argv[])
     osMinorVersion = 0;
   }
 
+  if ((osMajorVersion == 10) & (osMinorVersion < 5)) {
+    fprintf(stderr, "The FSEvents API is unavailable on this version of macos\n");
+    exit(EXIT_FAILURE);
+  }
+
   config.paths = CFArrayCreateMutable(NULL,
                                       (CFIndex)0,
                                       &kCFTypeArrayCallBacks);
@@ -116,29 +89,19 @@ static inline void parse_cli_settings(int argc, const char *argv[])
     } else if (strcmp(argv[i], "--watch-root") == 0) {
       config.flags |= kFSEventStreamCreateFlagWatchRoot;
     } else if (strcmp(argv[i], "--ignore-self") == 0) {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
       if ((osMajorVersion == 10) & (osMinorVersion >= 6)) {
         config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
       } else {
         fprintf(stderr, "MacOSX 10.6 or later is required for --ignore-self\n");
         exit(EXIT_FAILURE);
       }
-#else
-      fprintf(stderr, "MacOSX 10.6 SDK or later required to compile with --ignore-self support\n");
-      exit(EXIT_FAILURE);
-#endif
     } else if (strcmp(argv[i], "--file-events") == 0) {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
       if ((osMajorVersion == 10) & (osMinorVersion >= 7)) {
         config.flags |= kFSEventStreamCreateFlagFileEvents;
       } else {
         fprintf(stderr, "MacOSX 10.7 or later required for --file-events\n");
         exit(EXIT_FAILURE);
       }
-#else
-      fprintf(stderr, "MacOSX 10.7 SDK or later required to compile with --file-events support\n");
-      exit(EXIT_FAILURE);
-#endif
     } else if (strcmp(argv[i], "--format") == 0) {
       const char *format = argv[++i];
       if (strcmp(format, "classic") == 0) {
@@ -160,7 +123,14 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 #ifdef DEBUG
   fprintf(stderr, "config.sinceWhen    %llu\n", config.sinceWhen);
   fprintf(stderr, "config.latency      %f\n", config.latency);
+
+// STFU clang
+#if __LP64__
   fprintf(stderr, "config.flags        %#.8x\n", config.flags);
+#else
+  fprintf(stderr, "config.flags        %#.8lx\n", config.flags);
+#endif
+
   fprintf(stderr, "config.paths\n");
   
   long numpaths = CFArrayGetCount(config.paths);
