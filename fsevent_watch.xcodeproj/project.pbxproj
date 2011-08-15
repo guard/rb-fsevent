@@ -16,6 +16,7 @@
 		6A57F70313F5E614000BE6A9 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		6A57F70613F5E614000BE6A9 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		6AD3022F13F8D758007F24E8 /* compat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compat.h; sourceTree = "<group>"; };
+		6AD3023413F8E825007F24E8 /* fsevent_watch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsevent_watch.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +61,7 @@
 			children = (
 				6A57F70613F5E614000BE6A9 /* main.c */,
 				6AD3022F13F8D758007F24E8 /* compat.h */,
+				6AD3023413F8E825007F24E8 /* fsevent_watch.h */,
 			);
 			path = fsevent_watch;
 			sourceTree = "<group>";
