@@ -10,6 +10,8 @@
 
 #include <CoreServices/CoreServices.h>
 
+#include "compat.h"
+
 enum FSEventWatchOutputFormat {
   kFSEventWatchOutputFormatClassic,
   kFSEventWatchOutputFormatNIW
@@ -102,6 +104,11 @@ static inline void parse_cli_settings(int argc, const char *argv[])
     osMinorVersion = 0;
   }
 
+  if ((osMajorVersion == 10) & (osMinorVersion < 5)) {
+    fprintf(stderr, "The FSEvents API is unavailable on this version of macos\n");
+    exit(EXIT_FAILURE);
+  }
+
   config.paths = CFArrayCreateMutable(NULL,
                                       (CFIndex)0,
                                       &kCFTypeArrayCallBacks);
@@ -116,29 +123,19 @@ static inline void parse_cli_settings(int argc, const char *argv[])
     } else if (strcmp(argv[i], "--watch-root") == 0) {
       config.flags |= kFSEventStreamCreateFlagWatchRoot;
     } else if (strcmp(argv[i], "--ignore-self") == 0) {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
       if ((osMajorVersion == 10) & (osMinorVersion >= 6)) {
         config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
       } else {
         fprintf(stderr, "MacOSX 10.6 or later is required for --ignore-self\n");
         exit(EXIT_FAILURE);
       }
-#else
-      fprintf(stderr, "MacOSX 10.6 SDK or later required to compile with --ignore-self support\n");
-      exit(EXIT_FAILURE);
-#endif
     } else if (strcmp(argv[i], "--file-events") == 0) {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
       if ((osMajorVersion == 10) & (osMinorVersion >= 7)) {
         config.flags |= kFSEventStreamCreateFlagFileEvents;
       } else {
         fprintf(stderr, "MacOSX 10.7 or later required for --file-events\n");
         exit(EXIT_FAILURE);
       }
-#else
-      fprintf(stderr, "MacOSX 10.7 SDK or later required to compile with --file-events support\n");
-      exit(EXIT_FAILURE);
-#endif
     } else if (strcmp(argv[i], "--format") == 0) {
       const char *format = argv[++i];
       if (strcmp(format, "classic") == 0) {
