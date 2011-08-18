@@ -10,7 +10,7 @@ const char *cli_info_help[] = {
   "  -l, --latency=seconds     latency period (default='0.5')",
   "  -n, --no-defer            enable no-defer latency modifier",
   "  -r, --watch-root          watch for when the root path has changed",
-  "  -i, --ignore-self         ignore current process",
+  // "  -i, --ignore-self         ignore current process",
   "  -F, --file-events         provide file level event data",
   "  -f, --format=name         output format (classic, niw)",
   0
