@@ -1,9 +1,3 @@
-//
-//  fsevent_watch
-//
-//  Copyright (c) 2011 Travis Tilley. All rights reserved.
-//
-
 #include "fsevent_watch.h"
 #include "cli.h"
 
@@ -69,7 +63,7 @@ static inline void parse_cli_settings(int argc, const char *argv[])
   }
 
   if ((osMajorVersion == 10) & (osMinorVersion < 5)) {
-    fprintf(stderr, "The FSEvents API is unavailable on this version of macos\n");
+    fprintf(stderr, "The FSEvents API is unavailable on this version of macos!\n");
     exit(EXIT_FAILURE);
   }
   
@@ -86,6 +80,7 @@ static inline void parse_cli_settings(int argc, const char *argv[])
   
   config.sinceWhen = args_info.since_when_arg;
   config.latency = args_info.latency_arg;
+  config.format = args_info.format_arg;
   
   if (args_info.no_defer_flag)
     config.flags |= kFSEventStreamCreateFlagNoDefer;
@@ -108,12 +103,6 @@ static inline void parse_cli_settings(int argc, const char *argv[])
       fprintf(stderr, "MacOSX 10.7 or later required for --file-events\n");
       exit(EXIT_FAILURE);
     }
-  }
-  
-  if (args_info.format_arg == format_arg_classic) {
-    config.format = kFSEventWatchOutputFormatClassic;
-  } else if (args_info.format_arg == format_arg_niw) {
-    config.format = kFSEventWatchOutputFormatNIW;
   }
   
   if (args_info.inputs_num == 0) {

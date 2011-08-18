@@ -1,16 +1,9 @@
-//
-//  compat.h
-//  fsevent_watch
-//
-//  Copyright (c) 2011 Travis Tilley. All rights reserved.
-//
+#ifndef fsevent_watch_compat_h
+#define fsevent_watch_compat_h
 
 #ifndef __FSEVENTS__
 #include <CarbonCore/FSEvents.h>
 #endif
-
-#ifndef fsevent_watch_compat_h
-#define fsevent_watch_compat_h
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED < 1060
 // ignoring events originating from the current process introduced in 10.6
@@ -33,4 +26,4 @@ FSEventStreamEventFlags kFSEventStreamEventFlagItemCreated = 0x00000100,
                         kFSEventStreamEventFlagItemIsSymlink = 0x00040000;
 #endif
 
-#endif // fsevent_watch_compat_h
+#endif /* fsevent_watch_compat_h */

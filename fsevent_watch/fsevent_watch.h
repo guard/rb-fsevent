@@ -1,19 +1,7 @@
-//
-//  fsevent_watch.h
-//  fsevent_watch
-//
-//  Copyright (c) 2011 Travis Tilley. All rights reserved.
-//
-
 #ifndef fsevent_watch_h
 #define fsevent_watch_h
 
 #include "common.h"
-
-enum FSEventWatchOutputFormat {
-  kFSEventWatchOutputFormatClassic,
-  kFSEventWatchOutputFormatNIW
-};
 
 // Structure for storing metadata parsed from the commandline
 static struct {
@@ -40,4 +28,4 @@ static void         callback(FSEventStreamRef streamRef,
                              const FSEventStreamEventFlags eventFlags[],
                              const FSEventStreamEventId eventIds[]);
 
-#endif
+#endif /* fsevent_watch_h */

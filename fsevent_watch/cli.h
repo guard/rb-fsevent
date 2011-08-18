@@ -1,10 +1,3 @@
-//
-//  cli.h
-//  fsevent_watch
-//
-//  Copyright (c) 2011 Travis Tilley. All rights reserved.
-//
-
 #ifndef CLI_H
 #define CLI_H
 
@@ -13,11 +6,6 @@
 
 #include "common.h"
 
-enum output_format {
-  format_arg_classic = 0,
-  format_arg_niw
-};
-
 struct cli_info {
   UInt64 since_when_arg;
   double latency_arg;
@@ -25,7 +13,7 @@ struct cli_info {
   bool watch_root_flag;
   bool ignore_self_flag;
   bool file_events_flag;
-  enum output_format format_arg;
+  enum FSEventWatchOutputFormat format_arg;
   
   char **inputs;
   unsigned inputs_num;

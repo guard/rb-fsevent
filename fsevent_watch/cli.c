@@ -18,14 +18,13 @@ const char *cli_info_help[] = {
 
 static void default_args (struct cli_info *args_info)
 {
-  // args_info->since_when_arg = 0xFFFFFFFFFFFFFFFFULL;
   args_info->since_when_arg = kFSEventStreamEventIdSinceNow;
   args_info->latency_arg = 0.5;
   args_info->no_defer_flag = false;
   args_info->watch_root_flag = false;
   args_info->ignore_self_flag = false;
   args_info->file_events_flag = false;
-  args_info->format_arg = format_arg_classic;
+  args_info->format_arg = kFSEventWatchOutputFormatClassic;
 }
 
 static void cli_parser_release (struct cli_info *args_info)
@@ -116,9 +115,9 @@ int cli_parser (int argc, const char **argv, struct cli_info *args_info)
         break;
       case 'f': // format
         if (strcmp(optarg, "classic") == 0) {
-          args_info->format_arg = format_arg_classic;
+          args_info->format_arg = kFSEventWatchOutputFormatClassic;
         } else if (strcmp(optarg, "niw") == 0) {
-          args_info->format_arg = format_arg_niw;
+          args_info->format_arg = kFSEventWatchOutputFormatNIW;
         } else {
           fprintf(stderr, "Unknown output format: %s\n", optarg);
           exit(EXIT_FAILURE);
