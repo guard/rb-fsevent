@@ -58,6 +58,9 @@ void cli_parser_free (struct cli_info *args_info)
 void cli_print_version (void)
 {
   printf("%s %s\n", CLI_NAME, CLI_VERSION);
+#ifdef COMPILED_AT
+  printf("Compiled %s\n", COMPILED_AT);
+#endif
 }
 
 void cli_print_help (void)

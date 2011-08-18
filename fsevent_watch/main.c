@@ -160,6 +160,17 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 #else
   fprintf(stderr, "config.flags        %#.8lx\n", config.flags);
 #endif
+  
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagUseCFTypes, 
+                    "  Using CF instead of C types");
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagNoDefer, 
+                    "  NoDefer latency modifier enabled");
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagWatchRoot, 
+                    "  WatchRoot notifications enabled");
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagIgnoreSelf, 
+                    "  IgnoreSelf enabled");
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagFileEvents, 
+                    "  FileEvents enabled");
 
   fprintf(stderr, "config.paths\n");
 
@@ -212,23 +223,68 @@ static void callback(FSEventStreamRef streamRef,
 {
   char **paths = eventPaths;
 
-// commented out, at least for the moment, so that it doesn't inadvertently
-// make reading formatted output painful. it might make sense to even make this
-// its own output format.
-//
-//#ifdef DEBUG
-//  fprintf(stderr, "\n");
-//  fprintf(stderr, "FSEventStreamCallback fired!\n");
-//  fprintf(stderr, "  numEvents: %lu\n", numEvents);
-//
-//  for (size_t i = 0; i < numEvents; i++) {
-//    fprintf(stderr, "  event path: %s\n", paths[i]);
-//    fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
-//    fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
-//  }
-//
-//  fprintf(stderr, "\n");
-//#endif
+
+#ifdef DEBUG
+  fprintf(stderr, "\n");
+  fprintf(stderr, "FSEventStreamCallback fired!\n");
+  fprintf(stderr, "  numEvents: %lu\n", numEvents);
+
+  for (size_t i = 0; i < numEvents; i++) {
+    fprintf(stderr, "\n");
+    fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
+    
+// STFU clang
+#if __LP64__
+    fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
+#else
+    fprintf(stderr, "  event flags: %#.8lx\n", eventFlags[i]);
+#endif
+    
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagMustScanSubDirs,
+                      "    Recursive scanning of directory required");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagUserDropped,
+                      "    Buffering problem: events dropped user-side");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagKernelDropped,
+                      "    Buffering problem: events dropped kernel-side");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagEventIdsWrapped,
+                      "    Event IDs have wrapped");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagHistoryDone,
+                      "    All historical events have been processed");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagRootChanged,
+                      "    Root path has changed");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagMount,
+                      "    A new volume was mounted at this path");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagUnmount,
+                      "    A volume was unmounted from this path");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemCreated,
+                      "    Item created");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemRemoved,
+                      "    Item removed");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemInodeMetaMod,
+                      "    Item metadata modified");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemRenamed,
+                      "    Item renamed");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemModified,
+                      "    Item modified");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemFinderInfoMod,
+                      "    Item Finder Info modified");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemChangeOwner,
+                      "    Item changed ownership");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemXattrMod,
+                      "    Item extended attributes modified");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsFile,
+                      "    Item is a file");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsDir,
+                      "    Item is a directory");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsSymlink,
+                      "    Item is a symbolic link");
+    
+    fprintf(stderr, "  event path: %s\n", paths[i]);
+    fprintf(stderr, "\n");
+  }
+
+  fprintf(stderr, "\n");
+#endif
 
   if (config.format == kFSEventWatchOutputFormatClassic) {
     classic_output_format(numEvents, paths);

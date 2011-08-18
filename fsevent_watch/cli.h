@@ -1,8 +1,13 @@
 #ifndef CLI_H
 #define CLI_H
 
+#ifndef CLI_NAME
 #define CLI_NAME "fsevent_watch"
+#endif /* CLI_NAME */
+
+#ifndef CLI_VERSION
 #define CLI_VERSION "0.0.1"
+#endif /* CLI_VERSION */
 
 #include "common.h"
 
