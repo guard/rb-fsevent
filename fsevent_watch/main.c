@@ -1,6 +1,14 @@
 #include "common.h"
 #include "cli.h"
 
+// TODO: set on fire. cli.{h,c} handle both parsing and defaults, so there's
+//       no need to set those here. also, in order to scope metadata by path,
+//       each stream will need its own configuration... so this won't work as
+//       a global any more. In the end the goal is to make the output format
+//       able to declare not just that something happened and what flags were
+//       attached, but what path it was watching that caused those events (so
+//       that the path itself can be used for routing that information to the
+//       relevant callback).
 // Structure for storing metadata parsed from the commandline
 static struct {
   FSEventStreamEventId            sinceWhen;
