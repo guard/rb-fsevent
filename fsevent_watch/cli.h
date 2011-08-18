@@ -14,7 +14,7 @@ struct cli_info {
   bool ignore_self_flag;
   bool file_events_flag;
   enum FSEventWatchOutputFormat format_arg;
-  
+
   char **inputs;
   unsigned inputs_num;
 };

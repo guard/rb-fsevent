@@ -30,20 +30,22 @@ static void default_args (struct cli_info *args_info)
 static void cli_parser_release (struct cli_info *args_info)
 {
   unsigned int i;
-  
-  for (i=0; i < args_info->inputs_num; ++i)
+
+  for (i=0; i < args_info->inputs_num; ++i) {
     free(args_info->inputs[i]);
-  
-  if (args_info->inputs_num)
+  }
+
+  if (args_info->inputs_num) {
     free(args_info->inputs);
-  
+  }
+
   args_info->inputs_num = 0;
 }
 
 void cli_parser_init (struct cli_info *args_info)
 {
   default_args(args_info);
-  
+
   args_info->inputs = 0;
   args_info->inputs_num = 0;
 }
@@ -61,11 +63,11 @@ void cli_print_version (void)
 void cli_print_help (void)
 {
   cli_print_version();
-  
+
   printf("\n%s\n", cli_info_purpose);
   printf("\n%s\n", cli_info_usage);
   printf("\n");
-  
+
   int i = 0;
   while (cli_info_help[i]) {
     printf("%s\n", cli_info_help[i++]);
@@ -73,7 +75,7 @@ void cli_print_help (void)
 }
 
 int cli_parser (int argc, const char **argv, struct cli_info *args_info)
-{  
+{
   static struct option longopts[] = {
     { "help",         no_argument,        NULL, 'h' },
     { "version",      no_argument,        NULL, 'V' },
@@ -86,67 +88,65 @@ int cli_parser (int argc, const char **argv, struct cli_info *args_info)
     { "format",       required_argument,  NULL, 'f' },
     { 0, 0, 0, 0 }
   };
-  
+
   const char *shortopts = "hVs:l:nriFf:";
-  
+
   int c = -1;
-  
-  while ((c = getopt_long(argc, (char * const *)argv, shortopts, longopts, NULL)) != -1)
-  {
-    switch(c)
-    {
-      case 's': // since-when
-        args_info->since_when_arg = strtoull(optarg, NULL, 0);
-        break;
-      case 'l': // latency
-        args_info->latency_arg = strtod(optarg, NULL);
-        break;
-      case 'n': // no-defer
-        args_info->no_defer_flag = true;
-        break;
-      case 'r': // watch-root
-        args_info->watch_root_flag = true;
-        break;
-      case 'i': // ignore-self
-        args_info->ignore_self_flag = true;
-        break;
-      case 'F': // file-events
-        args_info->file_events_flag = true;
-        break;
-      case 'f': // format
-        if (strcmp(optarg, "classic") == 0) {
-          args_info->format_arg = kFSEventWatchOutputFormatClassic;
-        } else if (strcmp(optarg, "niw") == 0) {
-          args_info->format_arg = kFSEventWatchOutputFormatNIW;
-        } else {
-          fprintf(stderr, "Unknown output format: %s\n", optarg);
-          exit(EXIT_FAILURE);
-        }
-        break;
-      case 'V': // version
-        cli_print_version();
-        exit(EXIT_SUCCESS);
-        break;
-      case 'h': // help
-      case '?': // invalid option
-      case ':': // missing argument
-        cli_print_help();
-        exit((c == 'h') ? EXIT_SUCCESS : EXIT_FAILURE);
-        break;
+
+  while ((c = getopt_long(argc, (char * const *)argv, shortopts, longopts, NULL)) != -1) {
+    switch(c) {
+    case 's': // since-when
+      args_info->since_when_arg = strtoull(optarg, NULL, 0);
+      break;
+    case 'l': // latency
+      args_info->latency_arg = strtod(optarg, NULL);
+      break;
+    case 'n': // no-defer
+      args_info->no_defer_flag = true;
+      break;
+    case 'r': // watch-root
+      args_info->watch_root_flag = true;
+      break;
+    case 'i': // ignore-self
+      args_info->ignore_self_flag = true;
+      break;
+    case 'F': // file-events
+      args_info->file_events_flag = true;
+      break;
+    case 'f': // format
+      if (strcmp(optarg, "classic") == 0) {
+        args_info->format_arg = kFSEventWatchOutputFormatClassic;
+      } else if (strcmp(optarg, "niw") == 0) {
+        args_info->format_arg = kFSEventWatchOutputFormatNIW;
+      } else {
+        fprintf(stderr, "Unknown output format: %s\n", optarg);
+        exit(EXIT_FAILURE);
+      }
+      break;
+    case 'V': // version
+      cli_print_version();
+      exit(EXIT_SUCCESS);
+      break;
+    case 'h': // help
+    case '?': // invalid option
+    case ':': // missing argument
+      cli_print_help();
+      exit((c == 'h') ? EXIT_SUCCESS : EXIT_FAILURE);
+      break;
     }
   }
-  
-  if (optind < argc)
-  {
+
+  if (optind < argc) {
     int i = 0;
     args_info->inputs_num = argc - optind;
     args_info->inputs =
       (char **)(malloc ((args_info->inputs_num)*sizeof(char *)));
     while (optind < argc)
-      if (argv[optind++] != argv[0])
+      if (argv[optind++] != argv[0]) {
         args_info->inputs[i++] = strdup(argv[optind-1]);
+      }
   }
-  
+
   return EXIT_SUCCESS;
 }
 

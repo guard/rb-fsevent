@@ -43,14 +43,14 @@ static void append_path(const char *path)
   fprintf(stderr, "\n");
   fprintf(stderr, "append_path called for: %s\n", path);
 #endif
-  
+
   char fullPath[PATH_MAX];
-  
+
   if (realpath(path, fullPath) == NULL) {
 #ifdef DEBUG
     fprintf(stderr, "  realpath not directly resolvable from path\n");
 #endif
-    
+
     if (path[0] != '/') {
 #ifdef DEBUG
       fprintf(stderr, "  passed path is not absolute\n");
@@ -70,12 +70,12 @@ static void append_path(const char *path)
       strlcpy(fullPath, path, sizeof(fullPath));
     }
   }
-  
+
 #ifdef DEBUG
   fprintf(stderr, "  resolved path to: %s\n", fullPath);
   fprintf(stderr, "\n");
 #endif
-  
+
   CFStringRef pathRef = CFStringCreateWithCString(kCFAllocatorDefault,
                                                   fullPath,
                                                   kCFStringEncodingUTF8);
@@ -99,10 +99,10 @@ static inline void parse_cli_settings(int argc, const char *argv[])
     fprintf(stderr, "The FSEvents API is unavailable on this version of macos!\n");
     exit(EXIT_FAILURE);
   }
-  
+
   struct cli_info args_info;
   cli_parser_init(&args_info);
-  
+
   if (cli_parser(argc, argv, &args_info) != 0) {
     exit(EXIT_FAILURE);
   }
@@ -110,16 +110,18 @@ static inline void parse_cli_settings(int argc, const char *argv[])
   config.paths = CFArrayCreateMutable(NULL,
                                       (CFIndex)0,
                                       &kCFTypeArrayCallBacks);
-  
+
   config.sinceWhen = args_info.since_when_arg;
   config.latency = args_info.latency_arg;
   config.format = args_info.format_arg;
-  
-  if (args_info.no_defer_flag)
+
+  if (args_info.no_defer_flag) {
     config.flags |= kFSEventStreamCreateFlagNoDefer;
-  if (args_info.watch_root_flag)
+  }
+  if (args_info.watch_root_flag) {
     config.flags |= kFSEventStreamCreateFlagWatchRoot;
-  
+  }
+
   if (args_info.ignore_self_flag) {
     if ((osMajorVersion == 10) & (osMinorVersion >= 6)) {
       config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
@@ -128,7 +130,7 @@ static inline void parse_cli_settings(int argc, const char *argv[])
       exit(EXIT_FAILURE);
     }
   }
-  
+
   if (args_info.file_events_flag) {
     if ((osMajorVersion == 10) & (osMinorVersion >= 7)) {
       config.flags |= kFSEventStreamCreateFlagFileEvents;
@@ -137,17 +139,17 @@ static inline void parse_cli_settings(int argc, const char *argv[])
       exit(EXIT_FAILURE);
     }
   }
-  
+
   if (args_info.inputs_num == 0) {
     append_path(".");
   } else {
     for (unsigned int i=0; i < args_info.inputs_num; ++i) {
       append_path(args_info.inputs[i]);
-    } 
+    }
   }
-  
+
   cli_parser_free(&args_info);
-  
+
 #ifdef DEBUG
   fprintf(stderr, "config.sinceWhen    %llu\n", config.sinceWhen);
   fprintf(stderr, "config.latency      %f\n", config.latency);
@@ -160,9 +162,9 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 #endif
 
   fprintf(stderr, "config.paths\n");
-  
+
   long numpaths = CFArrayGetCount(config.paths);
-  
+
   for (long i = 0; i < numpaths; i++) {
     char path[PATH_MAX];
     CFStringGetCString(CFArrayGetValueAtIndex(config.paths, i),
@@ -171,7 +173,7 @@ static inline void parse_cli_settings(int argc, const char *argv[])
                        kCFStringEncodingUTF8);
     fprintf(stderr, "  %s\n", path);
   }
-  
+
   fprintf(stderr, "\n");
 #endif
 }
@@ -218,22 +220,22 @@ static void callback(FSEventStreamRef streamRef,
 //  fprintf(stderr, "\n");
 //  fprintf(stderr, "FSEventStreamCallback fired!\n");
 //  fprintf(stderr, "  numEvents: %lu\n", numEvents);
-//  
+//
 //  for (size_t i = 0; i < numEvents; i++) {
 //    fprintf(stderr, "  event path: %s\n", paths[i]);
 //    fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
 //    fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
 //  }
-//  
+//
 //  fprintf(stderr, "\n");
 //#endif
-  
+
   if (config.format == kFSEventWatchOutputFormatClassic) {
     classic_output_format(numEvents, paths);
   } else if (config.format == kFSEventWatchOutputFormatNIW) {
     niw_output_format(numEvents, paths, eventFlags, eventIds);
   }
-    
+
   fflush(stdout);
 }
 
@@ -267,9 +269,9 @@ int main(int argc, const char *argv[])
     fprintf(stderr, "Unable to set new process group.\n");
     return 1;
   }
-  
+
   parse_cli_settings(argc, argv);
-  
+
   FSEventStreamContext context = {0, NULL, NULL, NULL, NULL};
   FSEventStreamRef stream;
   stream = FSEventStreamCreate(kCFAllocatorDefault,
@@ -279,12 +281,12 @@ int main(int argc, const char *argv[])
                                config.sinceWhen,
                                config.latency,
                                config.flags);
-  
+
 #ifdef DEBUG
   FSEventStreamShow(stream);
   fprintf(stderr, "\n");
 #endif
-  
+
   FSEventStreamScheduleWithRunLoop(stream,
                                    CFRunLoopGetCurrent(),
                                    kCFRunLoopDefaultMode);
@@ -292,6 +294,6 @@ int main(int argc, const char *argv[])
   CFRunLoopRun();
   FSEventStreamFlushSync(stream);
   FSEventStreamStop(stream);
-  
+
   return 0;
 }
