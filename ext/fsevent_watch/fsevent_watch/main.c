@@ -1,13 +1,38 @@
-//
-//  fsevent_watch
-//
-//  Copyright (c) 2011 Travis Tilley. All rights reserved.
-//
+#include "common.h"
+#include "cli.h"
 
-#include <CoreServices/CoreServices.h>
-#include "compat.h"
-#include "fsevent_watch.h"
+// TODO: set on fire. cli.{h,c} handle both parsing and defaults, so there's
+//       no need to set those here. also, in order to scope metadata by path,
+//       each stream will need its own configuration... so this won't work as
+//       a global any more. In the end the goal is to make the output format
+//       able to declare not just that something happened and what flags were
+//       attached, but what path it was watching that caused those events (so
+//       that the path itself can be used for routing that information to the
+//       relevant callback).
+// Structure for storing metadata parsed from the commandline
+static struct {
+  FSEventStreamEventId            sinceWhen;
+  CFTimeInterval                  latency;
+  FSEventStreamCreateFlags        flags;
+  CFMutableArrayRef               paths;
+  enum FSEventWatchOutputFormat   format;
+} config = {
+  (UInt64) kFSEventStreamEventIdSinceNow,
+  (double) 0.3,
+  (UInt32) kFSEventStreamCreateFlagNone,
+  NULL,
+  kFSEventWatchOutputFormatClassic
+};
 
+// Prototypes
+static void         append_path(const char *path);
+static inline void  parse_cli_settings(int argc, const char *argv[]);
+static void         callback(FSEventStreamRef streamRef,
+                             void *clientCallBackInfo,
+                             size_t numEvents,
+                             void *eventPaths,
+                             const FSEventStreamEventFlags eventFlags[],
+                             const FSEventStreamEventId eventIds[]);
 
 // Resolve a path and append it to the CLI settings structure
 // The FSEvents API will, internally, resolve paths using a similar scheme.
@@ -18,14 +43,14 @@ static void append_path(const char *path)
   fprintf(stderr, "\n");
   fprintf(stderr, "append_path called for: %s\n", path);
 #endif
-  
+
   char fullPath[PATH_MAX];
-  
+
   if (realpath(path, fullPath) == NULL) {
 #ifdef DEBUG
     fprintf(stderr, "  realpath not directly resolvable from path\n");
 #endif
-    
+
     if (path[0] != '/') {
 #ifdef DEBUG
       fprintf(stderr, "  passed path is not absolute\n");
@@ -45,12 +70,12 @@ static void append_path(const char *path)
       strlcpy(fullPath, path, sizeof(fullPath));
     }
   }
-  
+
 #ifdef DEBUG
   fprintf(stderr, "  resolved path to: %s\n", fullPath);
   fprintf(stderr, "\n");
 #endif
-  
+
   CFStringRef pathRef = CFStringCreateWithCString(kCFAllocatorDefault,
                                                   fullPath,
                                                   kCFStringEncodingUTF8);
@@ -71,55 +96,60 @@ static inline void parse_cli_settings(int argc, const char *argv[])
   }
 
   if ((osMajorVersion == 10) & (osMinorVersion < 5)) {
-    fprintf(stderr, "The FSEvents API is unavailable on this version of macos\n");
+    fprintf(stderr, "The FSEvents API is unavailable on this version of macos!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  struct cli_info args_info;
+  cli_parser_init(&args_info);
+
+  if (cli_parser(argc, argv, &args_info) != 0) {
     exit(EXIT_FAILURE);
   }
 
   config.paths = CFArrayCreateMutable(NULL,
                                       (CFIndex)0,
                                       &kCFTypeArrayCallBacks);
-  
-  for (int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "--since-when") == 0) {
-      config.sinceWhen = strtoull(argv[++i], NULL, 0);
-    } else if (strcmp(argv[i], "--latency") == 0) {
-      config.latency = strtod(argv[++i], NULL);
-    } else if (strcmp(argv[i], "--no-defer") == 0) {
-      config.flags |= kFSEventStreamCreateFlagNoDefer;
-    } else if (strcmp(argv[i], "--watch-root") == 0) {
-      config.flags |= kFSEventStreamCreateFlagWatchRoot;
-    } else if (strcmp(argv[i], "--ignore-self") == 0) {
-      if ((osMajorVersion == 10) & (osMinorVersion >= 6)) {
-        config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
-      } else {
-        fprintf(stderr, "MacOSX 10.6 or later is required for --ignore-self\n");
-        exit(EXIT_FAILURE);
-      }
-    } else if (strcmp(argv[i], "--file-events") == 0) {
-      if ((osMajorVersion == 10) & (osMinorVersion >= 7)) {
-        config.flags |= kFSEventStreamCreateFlagFileEvents;
-      } else {
-        fprintf(stderr, "MacOSX 10.7 or later required for --file-events\n");
-        exit(EXIT_FAILURE);
-      }
-    } else if (strcmp(argv[i], "--format") == 0) {
-      const char *format = argv[++i];
-      if (strcmp(format, "classic") == 0) {
-        config.format = kFSEventWatchOutputFormatClassic;
-      } else if (strcmp(format, "niw") == 0) {
-        config.format = kFSEventWatchOutputFormatNIW;
-      } else {
-        fprintf(stderr, "Unknown format %s, falling back to default\n", format);
-      }
+
+  config.sinceWhen = args_info.since_when_arg;
+  config.latency = args_info.latency_arg;
+  config.format = args_info.format_arg;
+
+  if (args_info.no_defer_flag) {
+    config.flags |= kFSEventStreamCreateFlagNoDefer;
+  }
+  if (args_info.watch_root_flag) {
+    config.flags |= kFSEventStreamCreateFlagWatchRoot;
+  }
+
+  if (args_info.ignore_self_flag) {
+    if ((osMajorVersion == 10) & (osMinorVersion >= 6)) {
+      config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
     } else {
-      append_path(argv[i]);
+      fprintf(stderr, "MacOSX 10.6 or later is required for --ignore-self\n");
+      exit(EXIT_FAILURE);
     }
   }
-  
-  if (CFArrayGetCount(config.paths) == 0) {
-    append_path(".");
+
+  if (args_info.file_events_flag) {
+    if ((osMajorVersion == 10) & (osMinorVersion >= 7)) {
+      config.flags |= kFSEventStreamCreateFlagFileEvents;
+    } else {
+      fprintf(stderr, "MacOSX 10.7 or later required for --file-events\n");
+      exit(EXIT_FAILURE);
+    }
   }
-  
+
+  if (args_info.inputs_num == 0) {
+    append_path(".");
+  } else {
+    for (unsigned int i=0; i < args_info.inputs_num; ++i) {
+      append_path(args_info.inputs[i]);
+    }
+  }
+
+  cli_parser_free(&args_info);
+
 #ifdef DEBUG
   fprintf(stderr, "config.sinceWhen    %llu\n", config.sinceWhen);
   fprintf(stderr, "config.latency      %f\n", config.latency);
@@ -130,11 +160,22 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 #else
   fprintf(stderr, "config.flags        %#.8lx\n", config.flags);
 #endif
+  
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagUseCFTypes, 
+                    "  Using CF instead of C types");
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagNoDefer, 
+                    "  NoDefer latency modifier enabled");
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagWatchRoot, 
+                    "  WatchRoot notifications enabled");
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagIgnoreSelf, 
+                    "  IgnoreSelf enabled");
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagFileEvents, 
+                    "  FileEvents enabled");
 
   fprintf(stderr, "config.paths\n");
-  
+
   long numpaths = CFArrayGetCount(config.paths);
-  
+
   for (long i = 0; i < numpaths; i++) {
     char path[PATH_MAX];
     CFStringGetCString(CFArrayGetValueAtIndex(config.paths, i),
@@ -143,7 +184,7 @@ static inline void parse_cli_settings(int argc, const char *argv[])
                        kCFStringEncodingUTF8);
     fprintf(stderr, "  %s\n", path);
   }
-  
+
   fprintf(stderr, "\n");
 #endif
 }
@@ -182,30 +223,75 @@ static void callback(FSEventStreamRef streamRef,
 {
   char **paths = eventPaths;
 
-// commented out, at least for the moment, so that it doesn't inadvertently
-// make reading formatted output painful. it might make sense to even make this
-// its own output format.
-//
-//#ifdef DEBUG
-//  fprintf(stderr, "\n");
-//  fprintf(stderr, "FSEventStreamCallback fired!\n");
-//  fprintf(stderr, "  numEvents: %lu\n", numEvents);
-//  
-//  for (size_t i = 0; i < numEvents; i++) {
-//    fprintf(stderr, "  event path: %s\n", paths[i]);
-//    fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
-//    fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
-//  }
-//  
-//  fprintf(stderr, "\n");
-//#endif
-  
+
+#ifdef DEBUG
+  fprintf(stderr, "\n");
+  fprintf(stderr, "FSEventStreamCallback fired!\n");
+  fprintf(stderr, "  numEvents: %lu\n", numEvents);
+
+  for (size_t i = 0; i < numEvents; i++) {
+    fprintf(stderr, "\n");
+    fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
+    
+// STFU clang
+#if __LP64__
+    fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
+#else
+    fprintf(stderr, "  event flags: %#.8lx\n", eventFlags[i]);
+#endif
+    
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagMustScanSubDirs,
+                      "    Recursive scanning of directory required");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagUserDropped,
+                      "    Buffering problem: events dropped user-side");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagKernelDropped,
+                      "    Buffering problem: events dropped kernel-side");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagEventIdsWrapped,
+                      "    Event IDs have wrapped");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagHistoryDone,
+                      "    All historical events have been processed");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagRootChanged,
+                      "    Root path has changed");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagMount,
+                      "    A new volume was mounted at this path");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagUnmount,
+                      "    A volume was unmounted from this path");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemCreated,
+                      "    Item created");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemRemoved,
+                      "    Item removed");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemInodeMetaMod,
+                      "    Item metadata modified");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemRenamed,
+                      "    Item renamed");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemModified,
+                      "    Item modified");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemFinderInfoMod,
+                      "    Item Finder Info modified");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemChangeOwner,
+                      "    Item changed ownership");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemXattrMod,
+                      "    Item extended attributes modified");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsFile,
+                      "    Item is a file");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsDir,
+                      "    Item is a directory");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsSymlink,
+                      "    Item is a symbolic link");
+    
+    fprintf(stderr, "  event path: %s\n", paths[i]);
+    fprintf(stderr, "\n");
+  }
+
+  fprintf(stderr, "\n");
+#endif
+
   if (config.format == kFSEventWatchOutputFormatClassic) {
     classic_output_format(numEvents, paths);
   } else if (config.format == kFSEventWatchOutputFormatNIW) {
     niw_output_format(numEvents, paths, eventFlags, eventIds);
   }
-    
+
   fflush(stdout);
 }
 
@@ -239,9 +325,9 @@ int main(int argc, const char *argv[])
     fprintf(stderr, "Unable to set new process group.\n");
     return 1;
   }
-  
+
   parse_cli_settings(argc, argv);
-  
+
   FSEventStreamContext context = {0, NULL, NULL, NULL, NULL};
   FSEventStreamRef stream;
   stream = FSEventStreamCreate(kCFAllocatorDefault,
@@ -251,12 +337,12 @@ int main(int argc, const char *argv[])
                                config.sinceWhen,
                                config.latency,
                                config.flags);
-  
+
 #ifdef DEBUG
   FSEventStreamShow(stream);
   fprintf(stderr, "\n");
 #endif
-  
+
   FSEventStreamScheduleWithRunLoop(stream,
                                    CFRunLoopGetCurrent(),
                                    kCFRunLoopDefaultMode);
@@ -264,6 +350,6 @@ int main(int argc, const char *argv[])
   CFRunLoopRun();
   FSEventStreamFlushSync(stream);
   FSEventStreamStop(stream);
-  
+
   return 0;
 }
