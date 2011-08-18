@@ -8,6 +8,8 @@
 #ifndef fsevent_watch_h
 #define fsevent_watch_h
 
+#include "common.h"
+
 enum FSEventWatchOutputFormat {
   kFSEventWatchOutputFormatClassic,
   kFSEventWatchOutputFormatNIW

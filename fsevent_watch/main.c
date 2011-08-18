@@ -4,10 +4,8 @@
 //  Copyright (c) 2011 Travis Tilley. All rights reserved.
 //
 
-#include <CoreServices/CoreServices.h>
-#include "compat.h"
 #include "fsevent_watch.h"
-
+#include "cli.h"
 
 // Resolve a path and append it to the CLI settings structure
 // The FSEvents API will, internally, resolve paths using a similar scheme.
@@ -74,51 +72,59 @@ static inline void parse_cli_settings(int argc, const char *argv[])
     fprintf(stderr, "The FSEvents API is unavailable on this version of macos\n");
     exit(EXIT_FAILURE);
   }
+  
+  struct cli_info args_info;
+  cli_parser_init(&args_info);
+  
+  if (cli_parser(argc, argv, &args_info) != 0) {
+    exit(EXIT_FAILURE);
+  }
 
   config.paths = CFArrayCreateMutable(NULL,
                                       (CFIndex)0,
                                       &kCFTypeArrayCallBacks);
   
-  for (int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "--since-when") == 0) {
-      config.sinceWhen = strtoull(argv[++i], NULL, 0);
-    } else if (strcmp(argv[i], "--latency") == 0) {
-      config.latency = strtod(argv[++i], NULL);
-    } else if (strcmp(argv[i], "--no-defer") == 0) {
-      config.flags |= kFSEventStreamCreateFlagNoDefer;
-    } else if (strcmp(argv[i], "--watch-root") == 0) {
-      config.flags |= kFSEventStreamCreateFlagWatchRoot;
-    } else if (strcmp(argv[i], "--ignore-self") == 0) {
-      if ((osMajorVersion == 10) & (osMinorVersion >= 6)) {
-        config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
-      } else {
-        fprintf(stderr, "MacOSX 10.6 or later is required for --ignore-self\n");
-        exit(EXIT_FAILURE);
-      }
-    } else if (strcmp(argv[i], "--file-events") == 0) {
-      if ((osMajorVersion == 10) & (osMinorVersion >= 7)) {
-        config.flags |= kFSEventStreamCreateFlagFileEvents;
-      } else {
-        fprintf(stderr, "MacOSX 10.7 or later required for --file-events\n");
-        exit(EXIT_FAILURE);
-      }
-    } else if (strcmp(argv[i], "--format") == 0) {
-      const char *format = argv[++i];
-      if (strcmp(format, "classic") == 0) {
-        config.format = kFSEventWatchOutputFormatClassic;
-      } else if (strcmp(format, "niw") == 0) {
-        config.format = kFSEventWatchOutputFormatNIW;
-      } else {
-        fprintf(stderr, "Unknown format %s, falling back to default\n", format);
-      }
+  config.sinceWhen = args_info.since_when_arg;
+  config.latency = args_info.latency_arg;
+  
+  if (args_info.no_defer_flag)
+    config.flags |= kFSEventStreamCreateFlagNoDefer;
+  if (args_info.watch_root_flag)
+    config.flags |= kFSEventStreamCreateFlagWatchRoot;
+  
+  if (args_info.ignore_self_flag) {
+    if ((osMajorVersion == 10) & (osMinorVersion >= 6)) {
+      config.flags |= kFSEventStreamCreateFlagIgnoreSelf;
     } else {
-      append_path(argv[i]);
+      fprintf(stderr, "MacOSX 10.6 or later is required for --ignore-self\n");
+      exit(EXIT_FAILURE);
     }
   }
   
-  if (CFArrayGetCount(config.paths) == 0) {
-    append_path(".");
+  if (args_info.file_events_flag) {
+    if ((osMajorVersion == 10) & (osMinorVersion >= 7)) {
+      config.flags |= kFSEventStreamCreateFlagFileEvents;
+    } else {
+      fprintf(stderr, "MacOSX 10.7 or later required for --file-events\n");
+      exit(EXIT_FAILURE);
+    }
   }
+  
+  if (args_info.format_arg == format_arg_classic) {
+    config.format = kFSEventWatchOutputFormatClassic;
+  } else if (args_info.format_arg == format_arg_niw) {
+    config.format = kFSEventWatchOutputFormatNIW;
+  }
+  
+  if (args_info.inputs_num == 0) {
+    append_path(".");
+  } else {
+    for (unsigned int i=0; i < args_info.inputs_num; ++i) {
+      append_path(args_info.inputs[i]);
+    } 
+  }
+  
+  cli_parser_free(&args_info);
   
 #ifdef DEBUG
   fprintf(stderr, "config.sinceWhen    %llu\n", config.sinceWhen);
