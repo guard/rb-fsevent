@@ -19,7 +19,7 @@ static struct {
 } config = {
   (UInt64) kFSEventStreamEventIdSinceNow,
   (double) 0.3,
-  (UInt32) kFSEventStreamCreateFlagNone,
+  (CFOptionFlags) kFSEventStreamCreateFlagNone,
   NULL,
   kFSEventWatchOutputFormatClassic
 };
