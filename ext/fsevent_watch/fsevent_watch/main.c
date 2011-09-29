@@ -9,6 +9,7 @@
 //       attached, but what path it was watching that caused those events (so
 //       that the path itself can be used for routing that information to the
 //       relevant callback).
+//
 // Structure for storing metadata parsed from the commandline
 static struct {
   FSEventStreamEventId            sinceWhen;
@@ -19,32 +20,33 @@ static struct {
 } config = {
   (UInt64) kFSEventStreamEventIdSinceNow,
   (double) 0.3,
-  (UInt32) kFSEventStreamCreateFlagNone,
+  (CFOptionFlags) kFSEventStreamCreateFlagNone,
   NULL,
   kFSEventWatchOutputFormatClassic
 };
 
 // Prototypes
-static void         append_path(const char *path);
-static inline void  parse_cli_settings(int argc, const char *argv[]);
+static void         append_path(const char* path);
+static void         append_path2(const char* path);
+static inline void  parse_cli_settings(int argc, const char* argv[]);
 static void         callback(FSEventStreamRef streamRef,
-                             void *clientCallBackInfo,
+                             void* clientCallBackInfo,
                              size_t numEvents,
-                             void *eventPaths,
+                             void* eventPaths,
                              const FSEventStreamEventFlags eventFlags[],
                              const FSEventStreamEventId eventIds[]);
 
 // Resolve a path and append it to the CLI settings structure
 // The FSEvents API will, internally, resolve paths using a similar scheme.
 // Performing this ahead of time makes things less confusing, IMHO.
-static void append_path(const char *path)
+__attribute__((unused)) static void append_path(const char* path)
 {
 #ifdef DEBUG
   fprintf(stderr, "\n");
   fprintf(stderr, "append_path called for: %s\n", path);
 #endif
 
-  char fullPath[PATH_MAX];
+  char fullPath[PATH_MAX + 1];
 
   if (realpath(path, fullPath) == NULL) {
 #ifdef DEBUG
@@ -77,14 +79,83 @@ static void append_path(const char *path)
 #endif
 
   CFStringRef pathRef = CFStringCreateWithCString(kCFAllocatorDefault,
-                                                  fullPath,
-                                                  kCFStringEncodingUTF8);
+                        fullPath,
+                        kCFStringEncodingUTF8);
   CFArrayAppendValue(config.paths, pathRef);
   CFRelease(pathRef);
 }
 
+// straight from the rear
+static void append_path2(const char* path)
+{
+#ifdef DEBUG
+  char fullPath[PATH_MAX + 1];
+
+  fprintf(stderr, "\n");
+  fprintf(stderr, "append_path_ called for: %s\n", path);
+#endif
+
+  OSStatus err = noErr;
+  FSRef fsref = {};
+  AliasHandle itemAlias = NULL;
+  CFStringRef pathString = NULL;
+
+  err = FSPathMakeRefWithOptions((const UInt8*)path, kFSPathMakeRefDefaultOptions, &fsref, NULL);
+
+  if (err == noErr) {
+#ifdef DEBUG
+    fprintf(stderr, "  FSRef created\n");
+#endif
+    err = FSNewAlias(NULL, &fsref, &itemAlias);
+
+    if (err == noErr) {
+#ifdef DEBUG
+      fprintf(stderr, "  AliasHandle created\n");
+#endif
+      err = FSCopyAliasInfo(itemAlias, NULL, NULL, &pathString, NULL, NULL);
+    }
+
+    if (err == noErr) {
+#ifdef DEBUG
+      fprintf(stderr, "  Alias Info copied\n");
+      CFStringGetFileSystemRepresentation(pathString, fullPath, PATH_MAX + 1);
+      fprintf(stderr, "  resolved path to: %s\n", fullPath);
+      fprintf(stderr, "\n");
+#endif
+
+      CFArrayAppendValue(config.paths, pathString);
+    }
+  } else {
+#ifdef DEBUG
+    fprintf(stderr, "  assuming path does not YET exist\n");
+#endif
+
+    CFURLRef pathURL = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault,
+                       (const UInt8*)path,
+                       strlen(path), true);
+    pathString = CFURLCopyStrictPath(pathURL, NULL);
+    CFArrayAppendValue(config.paths, pathString);
+    CFRelease(pathURL);
+
+#ifdef DEBUG
+    CFStringGetFileSystemRepresentation(pathString, fullPath, PATH_MAX + 1);
+    fprintf(stderr, "  resolved path to: %s\n", fullPath);
+    fprintf(stderr, "\n");
+#endif
+  }
+
+  if (pathString != NULL) {
+    CFRelease(pathString);
+  }
+
+  if (itemAlias != NULL) {
+    DisposeHandle((Handle)itemAlias);
+    assert(MemError() == noErr);
+  }
+}
+
 // Parse commandline settings
-static inline void parse_cli_settings(int argc, const char *argv[])
+static inline void parse_cli_settings(int argc, const char* argv[])
 {
   // runtime os version detection
   SInt32 osMajorVersion, osMinorVersion;
@@ -141,10 +212,10 @@ static inline void parse_cli_settings(int argc, const char *argv[])
   }
 
   if (args_info.inputs_num == 0) {
-    append_path(".");
+    append_path2(".");
   } else {
     for (unsigned int i=0; i < args_info.inputs_num; ++i) {
-      append_path(args_info.inputs[i]);
+      append_path2(args_info.inputs[i]);
     }
   }
 
@@ -160,16 +231,16 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 #else
   fprintf(stderr, "config.flags        %#.8lx\n", config.flags);
 #endif
-  
-  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagUseCFTypes, 
+
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagUseCFTypes,
                     "  Using CF instead of C types");
-  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagNoDefer, 
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagNoDefer,
                     "  NoDefer latency modifier enabled");
-  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagWatchRoot, 
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagWatchRoot,
                     "  WatchRoot notifications enabled");
-  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagIgnoreSelf, 
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagIgnoreSelf,
                     "  IgnoreSelf enabled");
-  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagFileEvents, 
+  FLAG_CHECK_STDERR(config.flags, kFSEventStreamCreateFlagFileEvents,
                     "  FileEvents enabled");
 
   fprintf(stderr, "config.paths\n");
@@ -191,7 +262,7 @@ static inline void parse_cli_settings(int argc, const char *argv[])
 
 // original output format for rb-fsevent
 static void classic_output_format(size_t numEvents,
-                                  char **paths)
+                                  char** paths)
 {
   for (size_t i = 0; i < numEvents; i++) {
     fprintf(stdout, "%s:", paths[i]);
@@ -201,7 +272,7 @@ static void classic_output_format(size_t numEvents,
 
 // output format used in the Yoshimasa Niwa branch of rb-fsevent
 static void niw_output_format(size_t numEvents,
-                              char **paths,
+                              char** paths,
                               const FSEventStreamEventFlags eventFlags[],
                               const FSEventStreamEventId eventIds[])
 {
@@ -214,14 +285,68 @@ static void niw_output_format(size_t numEvents,
   fprintf(stdout, "\n");
 }
 
-static void callback(FSEventStreamRef streamRef,
-                     void *clientCallBackInfo,
+static void tstring_output_format(size_t numEvents,
+                                  char** paths,
+                                  const FSEventStreamEventFlags eventFlags[],
+                                  const FSEventStreamEventId eventIds[],
+                                  TSITStringFormat format)
+{
+  CFMutableArrayRef events = CFArrayCreateMutable(kCFAllocatorDefault,
+                             0, &kCFTypeArrayCallBacks);
+
+  for (size_t i = 0; i < numEvents; i++) {
+    CFMutableDictionaryRef event = CFDictionaryCreateMutable(kCFAllocatorDefault,
+                                   0,
+                                   &kCFTypeDictionaryKeyCallBacks,
+                                   &kCFTypeDictionaryValueCallBacks);
+
+    CFStringRef path = CFStringCreateWithBytes(kCFAllocatorDefault,
+                       (const UInt8*)paths[i],
+                       strlen(paths[i]),
+                       kCFStringEncodingUTF8,
+                       false);
+    CFDictionarySetValue(event, CFSTR("path"), path);
+
+    CFNumberRef flags = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &eventFlags[i]);
+    CFDictionarySetValue(event, CFSTR("flags"), flags);
+
+    CFNumberRef ident = CFNumberCreate(kCFAllocatorDefault, kCFNumberLongLongType, &eventIds[i]);
+    CFDictionarySetValue(event, CFSTR("id"), ident);
+
+    CFArrayAppendValue(events, event);
+
+    CFRelease(event);
+    CFRelease(path);
+    CFRelease(flags);
+    CFRelease(ident);
+  }
+
+  CFMutableDictionaryRef meta = CFDictionaryCreateMutable(kCFAllocatorDefault,
+                                0,
+                                &kCFTypeDictionaryKeyCallBacks,
+                                &kCFTypeDictionaryValueCallBacks);
+  CFDictionarySetValue(meta, CFSTR("events"), events);
+
+  CFNumberRef num = CFNumberCreate(kCFAllocatorDefault, kCFNumberCFIndexType, &numEvents);
+  CFDictionarySetValue(meta, CFSTR("numEvents"), num);
+
+  CFDataRef data = TSICTStringCreateRenderedDataFromObjectWithFormat(meta, format);
+  fprintf(stdout, "%s", CFDataGetBytePtr(data));
+
+  CFRelease(events);
+  CFRelease(num);
+  CFRelease(meta);
+  CFRelease(data);
+}
+
+static void callback(__attribute__((unused)) FSEventStreamRef streamRef,
+                     __attribute__((unused)) void* clientCallBackInfo,
                      size_t numEvents,
-                     void *eventPaths,
+                     void* eventPaths,
                      const FSEventStreamEventFlags eventFlags[],
                      const FSEventStreamEventId eventIds[])
 {
-  char **paths = eventPaths;
+  char** paths = eventPaths;
 
 
 #ifdef DEBUG
@@ -232,14 +357,14 @@ static void callback(FSEventStreamRef streamRef,
   for (size_t i = 0; i < numEvents; i++) {
     fprintf(stderr, "\n");
     fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
-    
+
 // STFU clang
 #if __LP64__
     fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
 #else
     fprintf(stderr, "  event flags: %#.8lx\n", eventFlags[i]);
 #endif
-    
+
     FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagMustScanSubDirs,
                       "    Recursive scanning of directory required");
     FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagUserDropped,
@@ -278,7 +403,7 @@ static void callback(FSEventStreamRef streamRef,
                       "    Item is a directory");
     FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsSymlink,
                       "    Item is a symbolic link");
-    
+
     fprintf(stderr, "  event path: %s\n", paths[i]);
     fprintf(stderr, "\n");
   }
@@ -290,12 +415,18 @@ static void callback(FSEventStreamRef streamRef,
     classic_output_format(numEvents, paths);
   } else if (config.format == kFSEventWatchOutputFormatNIW) {
     niw_output_format(numEvents, paths, eventFlags, eventIds);
+  } else if (config.format == kFSEventWatchOutputFormatTNetstring) {
+    tstring_output_format(numEvents, paths, eventFlags, eventIds,
+                          kTSITStringFormatTNetstring);
+  } else if (config.format == kFSEventWatchOutputFormatOTNetstring) {
+    tstring_output_format(numEvents, paths, eventFlags, eventIds,
+                          kTSITStringFormatOTNetstring);
   }
 
   fflush(stdout);
 }
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
   /*
    * a subprocess will initially inherit the process group of its parent. the
