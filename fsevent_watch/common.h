@@ -1,8 +1,14 @@
 #ifndef fsevent_watch_common_h
 #define fsevent_watch_common_h
 
+#include <CoreFoundation/CoreFoundation.h>
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+#endif
+
 #include <CoreServices/CoreServices.h>
 #include "compat.h"
+#include "TSICTString.h"
 
 #define COMPILED_AT __DATE__ " " __TIME__
 
@@ -19,7 +25,9 @@
 
 enum FSEventWatchOutputFormat {
   kFSEventWatchOutputFormatClassic,
-  kFSEventWatchOutputFormatNIW
+  kFSEventWatchOutputFormatNIW,
+  kFSEventWatchOutputFormatTNetstring,
+  kFSEventWatchOutputFormatOTNetstring
 };
 
 #endif /* fsevent_watch_common_h */

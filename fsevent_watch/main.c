@@ -214,8 +214,62 @@ static void niw_output_format(size_t numEvents,
   fprintf(stdout, "\n");
 }
 
-static void callback(FSEventStreamRef streamRef,
-                     void *clientCallBackInfo,
+static void tstring_output_format(size_t numEvents,
+                                  char **paths,
+                                  const FSEventStreamEventFlags eventFlags[],
+                                  const FSEventStreamEventId eventIds[],
+                                  TSITStringFormat format)
+{
+  CFMutableArrayRef events = CFArrayCreateMutable(kCFAllocatorDefault,
+                                                  0, &kCFTypeArrayCallBacks);
+  
+  for (size_t i = 0; i < numEvents; i++) {
+    CFMutableDictionaryRef event = CFDictionaryCreateMutable(kCFAllocatorDefault,
+                                                             0,
+                                                             &kCFTypeDictionaryKeyCallBacks,
+                                                             &kCFTypeDictionaryValueCallBacks);
+    
+    CFStringRef path = CFStringCreateWithBytes(kCFAllocatorDefault,
+                                               (const UInt8*)paths[i],
+                                               strlen(paths[i]),
+                                               kCFStringEncodingUTF8,
+                                               false);
+    CFDictionarySetValue(event, CFSTR("path"), path);
+    
+    CFNumberRef flags = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &eventFlags[i]);
+    CFDictionarySetValue(event, CFSTR("flags"), flags);
+    
+    CFNumberRef ident = CFNumberCreate(kCFAllocatorDefault, kCFNumberLongLongType, &eventIds[i]);
+    CFDictionarySetValue(event, CFSTR("id"), ident);
+    
+    CFArrayAppendValue(events, event);
+    
+    CFRelease(event);
+    CFRelease(path);
+    CFRelease(flags);
+    CFRelease(ident);
+  }
+  
+  CFMutableDictionaryRef meta = CFDictionaryCreateMutable(kCFAllocatorDefault,
+                                                          0,
+                                                          &kCFTypeDictionaryKeyCallBacks,
+                                                          &kCFTypeDictionaryValueCallBacks);
+  CFDictionarySetValue(meta, CFSTR("events"), events);
+  
+  CFNumberRef num = CFNumberCreate(kCFAllocatorDefault, kCFNumberCFIndexType, &numEvents);
+  CFDictionarySetValue(meta, CFSTR("numEvents"), num);
+  
+  CFDataRef data = TSICTStringCreateRenderedDataFromObjectWithFormat(meta, format);
+  fprintf(stdout, "%s", CFDataGetBytePtr(data));
+  
+  CFRelease(events);
+  CFRelease(num);
+  CFRelease(meta);
+  CFRelease(data);
+}
+
+static void callback(__attribute__((unused)) FSEventStreamRef streamRef,
+                     __attribute__((unused)) void *clientCallBackInfo,
                      size_t numEvents,
                      void *eventPaths,
                      const FSEventStreamEventFlags eventFlags[],
@@ -290,6 +344,12 @@ static void callback(FSEventStreamRef streamRef,
     classic_output_format(numEvents, paths);
   } else if (config.format == kFSEventWatchOutputFormatNIW) {
     niw_output_format(numEvents, paths, eventFlags, eventIds);
+  } else if (config.format == kFSEventWatchOutputFormatTNetstring) {
+    tstring_output_format(numEvents, paths, eventFlags, eventIds,
+                          kTSITStringFormatTNetstring);
+  } else if (config.format == kFSEventWatchOutputFormatOTNetstring) {
+    tstring_output_format(numEvents, paths, eventFlags, eventIds,
+                          kTSITStringFormatOTNetstring);
   }
 
   fflush(stdout);

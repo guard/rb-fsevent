@@ -10,6 +10,8 @@
 		6A20BF7F13FC9BC000C6C442 /* cli.c in Sources */ = {isa = PBXBuildFile; fileRef = 6A20BF7C13FC9BC000C6C442 /* cli.c */; };
 		6A57F70413F5E614000BE6A9 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A57F70313F5E614000BE6A9 /* CoreServices.framework */; };
 		6A57F70713F5E614000BE6A9 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 6A57F70613F5E614000BE6A9 /* main.c */; };
+		6A81FCE8143429DF00F83EDD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A81FCE7143429DE00F83EDD /* CoreFoundation.framework */; };
+		6A81FCEC14342A6300F83EDD /* TSICTString.c in Sources */ = {isa = PBXBuildFile; fileRef = 6A81FCEA14342A6300F83EDD /* TSICTString.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +21,9 @@
 		6A57F6FF13F5E614000BE6A9 /* fsevent_watch */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = fsevent_watch; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A57F70313F5E614000BE6A9 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		6A57F70613F5E614000BE6A9 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		6A81FCE7143429DE00F83EDD /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		6A81FCEA14342A6300F83EDD /* TSICTString.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TSICTString.c; sourceTree = "<group>"; };
+		6A81FCEB14342A6300F83EDD /* TSICTString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TSICTString.h; sourceTree = "<group>"; };
 		6AD3022F13F8D758007F24E8 /* compat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compat.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -27,6 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6A81FCE8143429DF00F83EDD /* CoreFoundation.framework in Frameworks */,
 				6A57F70413F5E614000BE6A9 /* CoreServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -41,7 +47,9 @@
 				6A57F70213F5E614000BE6A9 /* Frameworks */,
 				6A57F70013F5E614000BE6A9 /* Products */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
+			tabWidth = 2;
 		};
 		6A57F70013F5E614000BE6A9 /* Products */ = {
 			isa = PBXGroup;
@@ -54,6 +62,7 @@
 		6A57F70213F5E614000BE6A9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6A81FCE7143429DE00F83EDD /* CoreFoundation.framework */,
 				6A57F70313F5E614000BE6A9 /* CoreServices.framework */,
 			);
 			name = Frameworks;
@@ -62,6 +71,8 @@
 		6A57F70513F5E614000BE6A9 /* fsevent_watch */ = {
 			isa = PBXGroup;
 			children = (
+				6A81FCEA14342A6300F83EDD /* TSICTString.c */,
+				6A81FCEB14342A6300F83EDD /* TSICTString.h */,
 				6A20BF7C13FC9BC000C6C442 /* cli.c */,
 				6A20BF7D13FC9BC000C6C442 /* cli.h */,
 				6A20BF7E13FC9BC000C6C442 /* common.h */,
@@ -123,6 +134,7 @@
 			files = (
 				6A57F70713F5E614000BE6A9 /* main.c in Sources */,
 				6A20BF7F13FC9BC000C6C442 /* cli.c in Sources */,
+				6A81FCEC14342A6300F83EDD /* TSICTString.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

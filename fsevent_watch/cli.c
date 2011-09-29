@@ -12,7 +12,8 @@ const char *cli_info_help[] = {
   "  -r, --watch-root          watch for when the root path has changed",
   // "  -i, --ignore-self         ignore current process",
   "  -F, --file-events         provide file level event data",
-  "  -f, --format=name         output format (classic, niw)",
+  "  -f, --format=name         output format (classic, niw, \n"
+  "                                           tnetstring, otnetstring)",
   0
 };
 
@@ -121,6 +122,10 @@ int cli_parser (int argc, const char **argv, struct cli_info *args_info)
         args_info->format_arg = kFSEventWatchOutputFormatClassic;
       } else if (strcmp(optarg, "niw") == 0) {
         args_info->format_arg = kFSEventWatchOutputFormatNIW;
+      } else if (strcmp(optarg, "tnetstring") == 0) {
+        args_info->format_arg = kFSEventWatchOutputFormatTNetstring;
+      } else if (strcmp(optarg, "otnetstring") == 0) {
+        args_info->format_arg = kFSEventWatchOutputFormatOTNetstring;
       } else {
         fprintf(stderr, "Unknown output format: %s\n", optarg);
         exit(EXIT_FAILURE);
