@@ -20,20 +20,20 @@ struct cli_info {
   bool file_events_flag;
   enum FSEventWatchOutputFormat format_arg;
 
-  char **inputs;
+  char** inputs;
   unsigned inputs_num;
 };
 
-extern const char *cli_info_purpose;
-extern const char *cli_info_usage;
-extern const char *cli_info_help[];
+extern const char* cli_info_purpose;
+extern const char* cli_info_usage;
+extern const char* cli_info_help[];
 
 void cli_print_help(void);
 void cli_print_version(void);
 
-int cli_parser (int argc, const char **argv, struct cli_info *args_info);
-void cli_parser_init (struct cli_info *args_info);
-void cli_parser_free (struct cli_info *args_info);
+int cli_parser (int argc, const char** argv, struct cli_info* args_info);
+void cli_parser_init (struct cli_info* args_info);
+void cli_parser_free (struct cli_info* args_info);
 
 
 #endif /* CLI_H */

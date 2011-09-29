@@ -1,9 +1,9 @@
 #include <getopt.h>
 #include "cli.h"
 
-const char *cli_info_purpose = "A flexible command-line interface for the FSEvents API";
-const char *cli_info_usage = "Usage: fsevent_watch [OPTIONS]... [PATHS]...";
-const char *cli_info_help[] = {
+const char* cli_info_purpose = "A flexible command-line interface for the FSEvents API";
+const char* cli_info_usage = "Usage: fsevent_watch [OPTIONS]... [PATHS]...";
+const char* cli_info_help[] = {
   "  -h, --help                you're looking at it",
   "  -V, --version             print version number and exit",
   "  -s, --since-when=EventID  fire historical events since ID",
@@ -17,18 +17,18 @@ const char *cli_info_help[] = {
   0
 };
 
-static void default_args (struct cli_info *args_info)
+static void default_args (struct cli_info* args_info)
 {
-  args_info->since_when_arg = kFSEventStreamEventIdSinceNow;
-  args_info->latency_arg = 0.5;
-  args_info->no_defer_flag = false;
-  args_info->watch_root_flag = false;
-  args_info->ignore_self_flag = false;
-  args_info->file_events_flag = false;
-  args_info->format_arg = kFSEventWatchOutputFormatClassic;
+  args_info->since_when_arg     = kFSEventStreamEventIdSinceNow;
+  args_info->latency_arg        = 0.5;
+  args_info->no_defer_flag      = false;
+  args_info->watch_root_flag    = false;
+  args_info->ignore_self_flag   = false;
+  args_info->file_events_flag   = false;
+  args_info->format_arg         = kFSEventWatchOutputFormatClassic;
 }
 
-static void cli_parser_release (struct cli_info *args_info)
+static void cli_parser_release (struct cli_info* args_info)
 {
   unsigned int i;
 
@@ -43,7 +43,7 @@ static void cli_parser_release (struct cli_info *args_info)
   args_info->inputs_num = 0;
 }
 
-void cli_parser_init (struct cli_info *args_info)
+void cli_parser_init (struct cli_info* args_info)
 {
   default_args(args_info);
 
@@ -51,7 +51,7 @@ void cli_parser_init (struct cli_info *args_info)
   args_info->inputs_num = 0;
 }
 
-void cli_parser_free (struct cli_info *args_info)
+void cli_parser_free (struct cli_info* args_info)
 {
   cli_parser_release(args_info);
 }
@@ -78,7 +78,7 @@ void cli_print_help (void)
   }
 }
 
-int cli_parser (int argc, const char **argv, struct cli_info *args_info)
+int cli_parser (int argc, const char** argv, struct cli_info* args_info)
 {
   static struct option longopts[] = {
     { "help",         no_argument,        NULL, 'h' },
@@ -93,11 +93,11 @@ int cli_parser (int argc, const char **argv, struct cli_info *args_info)
     { 0, 0, 0, 0 }
   };
 
-  const char *shortopts = "hVs:l:nriFf:";
+  const char* shortopts = "hVs:l:nriFf:";
 
   int c = -1;
 
-  while ((c = getopt_long(argc, (char * const *)argv, shortopts, longopts, NULL)) != -1) {
+  while ((c = getopt_long(argc, (char * const*)argv, shortopts, longopts, NULL)) != -1) {
     switch(c) {
     case 's': // since-when
       args_info->since_when_arg = strtoull(optarg, NULL, 0);
@@ -148,7 +148,7 @@ int cli_parser (int argc, const char **argv, struct cli_info *args_info)
     int i = 0;
     args_info->inputs_num = argc - optind;
     args_info->inputs =
-      (char **)(malloc ((args_info->inputs_num)*sizeof(char *)));
+      (char**)(malloc ((args_info->inputs_num)*sizeof(char*)));
     while (optind < argc)
       if (argv[optind++] != argv[0]) {
         args_info->inputs[i++] = strdup(argv[optind-1]);

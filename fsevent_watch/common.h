@@ -3,7 +3,7 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #ifdef __OBJC__
-    #import <Foundation/Foundation.h>
+#import <Foundation/Foundation.h>
 #endif
 
 #include <CoreServices/CoreServices.h>
@@ -17,7 +17,7 @@
 #define FPRINTF_FLAG_CHECK(flags, flag, msg, fd)  \
   do {                                            \
     if (FLAG_CHECK(flags, flag)) {                \
-      fprintf(fd, "%s", msg "\n"); } }                 \
+      fprintf(fd, "%s", msg "\n"); } }            \
   while (0)
 
 #define FLAG_CHECK_STDERR(flags, flag, msg)       \
