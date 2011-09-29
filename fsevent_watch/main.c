@@ -92,7 +92,7 @@ static void append_path2(const char* path)
   char fullPath[PATH_MAX + 1];
 
   fprintf(stderr, "\n");
-  fprintf(stderr, "append_path_ called for: %s\n", path);
+  fprintf(stderr, "append_path2 called for: %s\n", path);
 #endif
 
   OSStatus err = noErr;
