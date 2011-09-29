@@ -7,6 +7,7 @@
 #endif
 
 #include <CoreServices/CoreServices.h>
+#include <unistd.h>
 #include "compat.h"
 #include "TSICTString.h"
 
