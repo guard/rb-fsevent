@@ -96,7 +96,7 @@ static void append_path2(const char* path)
 #endif
 
   OSStatus err = noErr;
-  FSRef fsref = {};
+  FSRef fsref;
   AliasHandle itemAlias = NULL;
   CFStringRef pathString = NULL;
 
