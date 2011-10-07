@@ -27,7 +27,6 @@ static struct {
 
 // Prototypes
 static void         append_path(const char* path);
-static void         append_path2(const char* path);
 static inline void  parse_cli_settings(int argc, const char* argv[]);
 static void         callback(FSEventStreamRef streamRef,
                              void* clientCallBackInfo,
@@ -36,23 +35,106 @@ static void         callback(FSEventStreamRef streamRef,
                              const FSEventStreamEventFlags eventFlags[],
                              const FSEventStreamEventId eventIds[]);
 
+
 // Resolve a path and append it to the CLI settings structure
 // The FSEvents API will, internally, resolve paths using a similar scheme.
 // Performing this ahead of time makes things less confusing, IMHO.
-__attribute__((unused)) static void append_path(const char* path)
+static void append_path(const char* path)
 {
 #ifdef DEBUG
   fprintf(stderr, "\n");
   fprintf(stderr, "append_path called for: %s\n", path);
 #endif
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
+  
+#ifdef DEBUG
+  fprintf(stderr, "compiled against 10.6+, using CFURLCreateFileReferenceURL\n");
+#endif
+  
+  CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8*)path, strlen(path), false);
+  CFURLRef placeholder = CFURLCopyAbsoluteURL(url);
+  CFRelease(url);
+  
+  CFMutableArrayRef imaginary = NULL;
+  
+  while(!CFURLResourceIsReachable(placeholder, NULL)) {
+#ifdef DEBUG
+    fprintf(stderr, "path does not exist\n");
+#endif
+    
+    CFStringRef child;
+    
+    if (imaginary == NULL) {
+      imaginary = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+    }
+    
+    child = CFURLCopyLastPathComponent(placeholder);
+    CFArrayInsertValueAtIndex(imaginary, 0, child);
+    CFRelease(child);
+    
+    url = CFURLCreateCopyDeletingLastPathComponent(NULL, placeholder);
+    CFRelease(placeholder);
+    placeholder = url;
+    
+#ifdef DEBUG
+    fprintf(stderr, "parent: ");
+    CFShow(placeholder);
+#endif
+  }
+  
+#ifdef DEBUG
+  fprintf(stderr, "path exists\n");
+#endif
+  
+  url = CFURLCreateFileReferenceURL(NULL, placeholder, NULL);
+  CFRelease(placeholder);
+  placeholder = CFURLCreateFilePathURL(NULL, url, NULL);
+  CFRelease(url);
+  
+#ifdef DEBUG
+  fprintf(stderr, "path resolved to: ");
+  CFShow(placeholder);
+#endif
+  
+  if (imaginary != NULL) {
+    CFIndex count = CFArrayGetCount(imaginary);
+    for (CFIndex i = 0; i<count; i++) {
+      CFStringRef component = CFArrayGetValueAtIndex(imaginary, i);
+#ifdef DEBUG
+      fprintf(stderr, "appending component: ");
+      CFShow(component);
+#endif
+      url = CFURLCreateCopyAppendingPathComponent(NULL, placeholder, component, false);
+      CFRelease(placeholder);
+      placeholder = url;
+    }
+    CFRelease(imaginary);
+  }
+  
+#ifdef DEBUG
+  fprintf(stderr, "result: ");
+  CFShow(placeholder);
+#endif
+  
+  CFStringRef cfPath = CFURLCopyFileSystemPath(placeholder, kCFURLPOSIXPathStyle);
+  CFArrayAppendValue(config.paths, cfPath);
+  CFRelease(cfPath);
+  CFRelease(placeholder);
+  
+#else
+  
+#ifdef DEBUG
+  fprintf(stderr, "compiled against 10.5, using realpath()\n");
+#endif
+  
   char fullPath[PATH_MAX + 1];
-
+  
   if (realpath(path, fullPath) == NULL) {
 #ifdef DEBUG
     fprintf(stderr, "  realpath not directly resolvable from path\n");
 #endif
-
+    
     if (path[0] != '/') {
 #ifdef DEBUG
       fprintf(stderr, "  passed path is not absolute\n");
@@ -72,86 +154,19 @@ __attribute__((unused)) static void append_path(const char* path)
       strlcpy(fullPath, path, sizeof(fullPath));
     }
   }
-
+  
 #ifdef DEBUG
   fprintf(stderr, "  resolved path to: %s\n", fullPath);
   fprintf(stderr, "\n");
 #endif
-
+  
   CFStringRef pathRef = CFStringCreateWithCString(kCFAllocatorDefault,
-                        fullPath,
-                        kCFStringEncodingUTF8);
+                                                  fullPath,
+                                                  kCFStringEncodingUTF8);
   CFArrayAppendValue(config.paths, pathRef);
   CFRelease(pathRef);
-}
-
-// straight from the rear
-static void append_path2(const char* path)
-{
-#ifdef DEBUG
-  char fullPath[PATH_MAX + 1];
-
-  fprintf(stderr, "\n");
-  fprintf(stderr, "append_path2 called for: %s\n", path);
+  
 #endif
-
-  OSStatus err = noErr;
-  FSRef fsref;
-  AliasHandle itemAlias = NULL;
-  CFStringRef pathString = NULL;
-
-  err = FSPathMakeRefWithOptions((const UInt8*)path, kFSPathMakeRefDefaultOptions, &fsref, NULL);
-
-  if (err == noErr) {
-#ifdef DEBUG
-    fprintf(stderr, "  FSRef created\n");
-#endif
-    err = FSNewAlias(NULL, &fsref, &itemAlias);
-
-    if (err == noErr) {
-#ifdef DEBUG
-      fprintf(stderr, "  AliasHandle created\n");
-#endif
-      err = FSCopyAliasInfo(itemAlias, NULL, NULL, &pathString, NULL, NULL);
-    }
-
-    if (err == noErr) {
-#ifdef DEBUG
-      fprintf(stderr, "  Alias Info copied\n");
-      CFStringGetFileSystemRepresentation(pathString, fullPath, PATH_MAX + 1);
-      fprintf(stderr, "  resolved path to: %s\n", fullPath);
-      fprintf(stderr, "\n");
-#endif
-
-      CFArrayAppendValue(config.paths, pathString);
-    }
-  } else {
-#ifdef DEBUG
-    fprintf(stderr, "  assuming path does not YET exist\n");
-#endif
-
-    CFURLRef pathURL = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault,
-                       (const UInt8*)path,
-                       strlen(path), true);
-    pathString = CFURLCopyStrictPath(pathURL, NULL);
-    CFArrayAppendValue(config.paths, pathString);
-    CFRelease(pathURL);
-
-#ifdef DEBUG
-    CFStringGetFileSystemRepresentation(pathString, fullPath, PATH_MAX + 1);
-    fprintf(stderr, "  resolved path to: %s\n", fullPath);
-    fprintf(stderr, "\n");
-#endif
-  }
-
-  if (pathString != NULL) {
-    CFRelease(pathString);
-  }
-
-  if (itemAlias != NULL) {
-    DisposeHandle((Handle)itemAlias);
-    assert(MemError() == noErr);
-  }
 }
 
 // Parse commandline settings
@@ -212,10 +227,10 @@ static inline void parse_cli_settings(int argc, const char* argv[])
   }
 
   if (args_info.inputs_num == 0) {
-    append_path2(".");
+    append_path(".");
   } else {
     for (unsigned int i=0; i < args_info.inputs_num; ++i) {
-      append_path2(args_info.inputs[i]);
+      append_path(args_info.inputs[i]);
     }
   }
 
