@@ -58,6 +58,8 @@ static void append_path(const char* path)
   
   CFMutableArrayRef imaginary = NULL;
   
+  // if we don't have an existing url, spin until we get to a parent that
+  // does exist, saving any imaginary components for appending back later
   while(!CFURLResourceIsReachable(placeholder, NULL)) {
 #ifdef DEBUG
     fprintf(stderr, "path does not exist\n");
@@ -87,6 +89,11 @@ static void append_path(const char* path)
   fprintf(stderr, "path exists\n");
 #endif
   
+  // realpath() doesn't always return the correct case for a path, so this
+  // is a funky workaround that converts a path into a (volId/inodeId) pair
+  // and asks what the path should be for that. since it looks at the actual
+  // inode instead of returning the same case passed in like realpath()
+  // appears to do for HFS+, it should always be correct.
   url = CFURLCreateFileReferenceURL(NULL, placeholder, NULL);
   CFRelease(placeholder);
   placeholder = CFURLCreateFilePathURL(NULL, url, NULL);
@@ -97,6 +104,7 @@ static void append_path(const char* path)
   CFShow(placeholder);
 #endif
   
+  // if we stripped off any imaginary path components, append them back on
   if (imaginary != NULL) {
     CFIndex count = CFArrayGetCount(imaginary);
     for (CFIndex i = 0; i<count; i++) {
