@@ -16,13 +16,13 @@ TSITStringFormat TSITStringDefaultFormat = kTSITStringFormatTNetstring;
 
 static const CFRange BeginningRange = {0,0};
 
-static CFTypeID kCFDataTypeID       = -1;
-static CFTypeID kCFStringTypeID     = -1;
-static CFTypeID kCFNumberTypeID     = -1;
-static CFTypeID kCFBooleanTypeID    = -1;
-static CFTypeID kCFNullTypeID       = -1;
-static CFTypeID kCFArrayTypeID      = -1;
-static CFTypeID kCFDictionaryTypeID = -1;
+static CFTypeID kCFDataTypeID       = -1UL;
+static CFTypeID kCFStringTypeID     = -1UL;
+static CFTypeID kCFNumberTypeID     = -1UL;
+static CFTypeID kCFBooleanTypeID    = -1UL;
+static CFTypeID kCFNullTypeID       = -1UL;
+static CFTypeID kCFArrayTypeID      = -1UL;
+static CFTypeID kCFDictionaryTypeID = -1UL;
 
 
 __attribute__((constructor)) void Init_TSICTString(void)
@@ -88,14 +88,14 @@ static inline CFDataRef TSICTStringCreateDataFromIntermediateRepresentation(TStr
     UInt8* bufferBytes = CFDataGetMutableBytePtr(buffer);
     
     size_t prefixLength = strlen(rep->length) + 1;
-    CFDataReplaceBytes(buffer, BeginningRange, (const UInt8*)rep->length, prefixLength);
+    CFDataReplaceBytes(buffer, BeginningRange, (const UInt8*)rep->length, (CFIndex)prefixLength);
     
     if (rep->format == kTSITStringFormatTNetstring) {
-        const UInt8 ftag = TNetstringTypes[rep->type];
+        const UInt8 ftag = (UInt8)TNetstringTypes[rep->type];
         CFDataAppendBytes(buffer, &ftag, 1);
         bufferBytes[(prefixLength - 1)] = TNetstringSeparator;
     } else if (rep->format == kTSITStringFormatOTNetstring) {
-        const UInt8 ftag = OTNetstringTypes[rep->type];
+        const UInt8 ftag = (UInt8)OTNetstringTypes[rep->type];
         bufferBytes[(prefixLength - 1)] = ftag;
     }
     
@@ -315,13 +315,13 @@ TStringIRep* TSICTStringCreateWithNumberAndFormat(CFNumberRef number, TSITString
         }
         memmove(p, e, strlen(e)+1);
         
-        data = CFDataCreate(kCFAllocatorDefault, (UInt8*)buf, strlen(buf));
+        data = CFDataCreate(kCFAllocatorDefault, (UInt8*)buf, (CFIndex)strlen(buf));
     } else {
         char buf[32];
         SInt64 value;
         CFNumberGetValue(number, numType, &value);
         sprintf(buf, "%lli", value);
-        data = CFDataCreate(kCFAllocatorDefault, (UInt8*)buf, strlen(buf));
+        data = CFDataCreate(kCFAllocatorDefault, (UInt8*)buf, (CFIndex)strlen(buf));
     }
     
     TStringIRep* rep = TSICTStringCreateWithDataOfTypeAndFormat(data, tag, format);

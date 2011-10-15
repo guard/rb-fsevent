@@ -52,7 +52,7 @@ static void append_path(const char* path)
   fprintf(stderr, "compiled against 10.6+, using CFURLCreateFileReferenceURL\n");
 #endif
   
-  CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8*)path, strlen(path), false);
+  CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8*)path, (CFIndex)strlen(path), false);
   CFURLRef placeholder = CFURLCopyAbsoluteURL(url);
   CFRelease(url);
   
@@ -325,7 +325,7 @@ static void tstring_output_format(size_t numEvents,
 
     CFStringRef path = CFStringCreateWithBytes(kCFAllocatorDefault,
                        (const UInt8*)paths[i],
-                       strlen(paths[i]),
+                       (CFIndex)strlen(paths[i]),
                        kCFStringEncodingUTF8,
                        false);
     CFDictionarySetValue(event, CFSTR("path"), path);

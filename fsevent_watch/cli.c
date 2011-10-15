@@ -146,7 +146,7 @@ int cli_parser (int argc, const char** argv, struct cli_info* args_info)
 
   if (optind < argc) {
     int i = 0;
-    args_info->inputs_num = argc - optind;
+    args_info->inputs_num = (unsigned int)(argc - optind);
     args_info->inputs =
       (char**)(malloc ((args_info->inputs_num)*sizeof(char*)));
     while (optind < argc)

@@ -200,8 +200,16 @@
 				STRIP_INSTALLED_PRODUCT = NO;
 				VALID_ARCHS = "i386 x86_64";
 				WARNING_CFLAGS = (
+					"-pedantic",
 					"-Wall",
 					"-Wextra",
+					"-Wpointer-arith",
+					"-Wformat=2",
+					"-Wfloat-equal",
+					"-Wstrict-overflow=4",
+					"-Wbad-function-cast",
+					"-Winline",
+					"-Wconversion",
 				);
 			};
 			name = Debug;
