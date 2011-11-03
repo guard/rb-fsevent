@@ -5,8 +5,14 @@
 #define CLI_NAME "fsevent_watch"
 #endif /* CLI_NAME */
 
+#ifndef PROJECT_VERSION
+#error "PROJECT_VERSION not set"
+#endif /* PROJECT_VERSION */
+
 #ifndef CLI_VERSION
-#define CLI_VERSION "0.0.1"
+#define _str(s) #s
+#define _xstr(s) _str(s)
+#define CLI_VERSION _xstr(PROJECT_VERSION)
 #endif /* CLI_VERSION */
 
 #include "common.h"

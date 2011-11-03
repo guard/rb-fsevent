@@ -22,6 +22,7 @@
 		6A57F6FF13F5E614000BE6A9 /* fsevent_watch */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = fsevent_watch; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A57F70313F5E614000BE6A9 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		6A57F70613F5E614000BE6A9 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		6A68C5E31440CBDF0040623D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		6A81FCE7143429DE00F83EDD /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		6A81FCEA14342A6300F83EDD /* TSICTString.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TSICTString.c; sourceTree = "<group>"; };
 		6A81FCEB14342A6300F83EDD /* TSICTString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TSICTString.h; sourceTree = "<group>"; };
@@ -45,6 +46,7 @@
 		6A57F6F413F5E614000BE6A9 = {
 			isa = PBXGroup;
 			children = (
+				6A68C5E31440CBDF0040623D /* Info.plist */,
 				6A57F70513F5E614000BE6A9 /* fsevent_watch */,
 				6A57F70213F5E614000BE6A9 /* Frameworks */,
 				6A57F70013F5E614000BE6A9 /* Products */,
@@ -150,7 +152,9 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 0.1.0;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -165,6 +169,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					"PROJECT_VERSION=\"$(CURRENT_PROJECT_VERSION)\"",
 					"DEBUG=1",
 					"$(inherited)",
 				);
@@ -186,7 +191,7 @@
 				LD_NO_PIE = NO;
 				LLVM_LTO = NO;
 				"LLVM_LTO[arch=x86_64]" = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
@@ -194,7 +199,18 @@
 				SDKROOT = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				VALID_ARCHS = "i386 x86_64";
-				WARNING_CFLAGS = "-Wall";
+				WARNING_CFLAGS = (
+					"-pedantic",
+					"-Wall",
+					"-Wextra",
+					"-Wpointer-arith",
+					"-Wformat=2",
+					"-Wfloat-equal",
+					"-Wstrict-overflow=4",
+					"-Wbad-function-cast",
+					"-Winline",
+					"-Wconversion",
+				);
 			};
 			name = Debug;
 		};
@@ -203,7 +219,9 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = YES;
+				CURRENT_PROJECT_VERSION = 0.1.0;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -215,6 +233,10 @@
 				GCC_FAST_OBJC_DISPATCH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"PROJECT_VERSION=\"$(CURRENT_PROJECT_VERSION)\"",
+					"NDEBUG=1",
+				);
 				GCC_REUSE_STRINGS = YES;
 				GCC_STRICT_ALIASING = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -233,7 +255,7 @@
 				LD_NO_PIE = NO;
 				LLVM_LTO = NO;
 				"LLVM_LTO[arch=x86_64]" = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
@@ -246,7 +268,15 @@
 		6A57F70D13F5E614000BE6A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_PREPROCESS = YES;
 				MACH_O_TYPE = mh_execute;
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					Info.plist,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -254,7 +284,15 @@
 		6A57F70E13F5E614000BE6A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_PREPROCESS = YES;
 				MACH_O_TYPE = mh_execute;
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					Info.plist,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
