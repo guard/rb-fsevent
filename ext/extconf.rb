@@ -27,6 +27,9 @@ else
 
   cflags = core_flags + %w{-Os -pipe}
 
+  arch_sig = `uname -m`
+  cflags << '-arch i386'  if arch_sig =~ /i386$/i
+
   wflags = %w{
     -Wmissing-prototypes -Wreturn-type -Wmissing-braces -Wparentheses -Wswitch
     -Wunused-function -Wunused-label -Wunused-parameter -Wunused-variable
