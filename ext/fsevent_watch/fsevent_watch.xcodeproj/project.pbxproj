@@ -15,6 +15,21 @@
 		EDF2B90D143584E800C6EF62 /* compat.c in Sources */ = {isa = PBXBuildFile; fileRef = EDF2B90C143584E800C6EF62 /* compat.c */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXBuildRule section */
+		6A0B980414AA652A00952375 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.rl";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			name = "Ragel source to C source";
+			outputFiles = (
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).c",
+			);
+			script = "/usr/bin/env ragel $(INPUT_FILE_BASE).rl -G2 -o $(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).c\n/usr/bin/env ragel $(INPUT_FILE_BASE).rl -V -o $(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).dot\n";
+		};
+/* End PBXBuildRule section */
+
 /* Begin PBXFileReference section */
 		6A20BF7C13FC9BC000C6C442 /* cli.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cli.c; sourceTree = "<group>"; };
 		6A20BF7D13FC9BC000C6C442 /* cli.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cli.h; sourceTree = "<group>"; };
@@ -26,6 +41,10 @@
 		6A81FCE7143429DE00F83EDD /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		6A81FCEA14342A6300F83EDD /* TSICTString.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TSICTString.c; sourceTree = "<group>"; };
 		6A81FCEB14342A6300F83EDD /* TSICTString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TSICTString.h; sourceTree = "<group>"; };
+		6A8F495414AC05470094EE00 /* Common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Common.xcconfig; sourceTree = "<group>"; };
+		6A8F495514AC05470094EE00 /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		6A8F495614AC05470094EE00 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		6A8F495714AC05470094EE00 /* fsevent_watch.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = fsevent_watch.xcconfig; sourceTree = "<group>"; };
 		6AD3022F13F8D758007F24E8 /* compat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compat.h; sourceTree = "<group>"; };
 		EDF2B90C143584E800C6EF62 /* compat.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = compat.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -46,6 +65,7 @@
 		6A57F6F413F5E614000BE6A9 = {
 			isa = PBXGroup;
 			children = (
+				6A8F495314AC05470094EE00 /* xcconfig */,
 				6A68C5E31440CBDF0040623D /* Info.plist */,
 				6A57F70513F5E614000BE6A9 /* fsevent_watch */,
 				6A57F70213F5E614000BE6A9 /* Frameworks */,
@@ -87,6 +107,17 @@
 			path = fsevent_watch;
 			sourceTree = "<group>";
 		};
+		6A8F495314AC05470094EE00 /* xcconfig */ = {
+			isa = PBXGroup;
+			children = (
+				6A8F495414AC05470094EE00 /* Common.xcconfig */,
+				6A8F495514AC05470094EE00 /* Debug.xcconfig */,
+				6A8F495614AC05470094EE00 /* Release.xcconfig */,
+				6A8F495714AC05470094EE00 /* fsevent_watch.xcconfig */,
+			);
+			path = xcconfig;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -94,10 +125,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6A57F70C13F5E614000BE6A9 /* Build configuration list for PBXNativeTarget "fsevent_watch" */;
 			buildPhases = (
+				6A8F497D14AC134E0094EE00 /* plist */,
 				6A57F6FB13F5E614000BE6A9 /* Sources */,
 				6A57F6FC13F5E614000BE6A9 /* Frameworks */,
 			);
 			buildRules = (
+				6A0B980414AA652A00952375 /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -132,6 +165,25 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		6A8F497D14AC134E0094EE00 /* plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Info.plist",
+			);
+			name = plist;
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "${CC:-cc} -E -P -x c -Wno-trigraphs -traditional -CC \\\n-DCURRENT_PROJECT_VERSION=\"${CURRENT_PROJECT_VERSION}\" \\\n-DGCC_VERSION=\"${GCC_VERSION}\" \\\n-DMACOSX_DEPLOYMENT_TARGET=\"${MACOSX_DEPLOYMENT_TARGET}\" \\\n-DMAC_OS_X_PRODUCT_BUILD_VERSION=\"${MAC_OS_X_PRODUCT_BUILD_VERSION}\" \\\n-DMAC_OS_X_VERSION_ACTUAL=\"${MAC_OS_X_VERSION_ACTUAL}\" \\\n-DOPTIMIZATION_LEVEL=\"${OPTIMIZATION_LEVEL}\" \\\n-DPLATFORM_PRODUCT_BUILD_VERSION=\"${PLATFORM_PRODUCT_BUILD_VERSION}\" \\\n-DSDK_NAME=\"${SDK_NAME}\" \\\n-DSDK_PRODUCT_BUILD_VERSION=\"${SDK_PRODUCT_BUILD_VERSION}\" \\\n-DVERSION_INFO_BUILDER=\"${VERSION_INFO_BUILDER}\" \\\n-DVERSION_INFO_STRING=\"${VERSION_INFO_STRING}\" \\\n-DXCODE_PRODUCT_BUILD_VERSION=\"${XCODE_PRODUCT_BUILD_VERSION}\" \\\n-DXCODE_VERSION_ACTUAL=\"${XCODE_VERSION_ACTUAL}\" \\\n\"${SRCROOT}/Info.plist\" \\\n-o \"${DERIVED_FILE_DIR}/Info.plist\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		6A57F6FB13F5E614000BE6A9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -149,151 +201,29 @@
 /* Begin XCBuildConfiguration section */
 		6A57F70A13F5E614000BE6A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6A8F495514AC05470094EE00 /* Debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0.1.0;
-				DEAD_CODE_STRIPPING = YES;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = unsupported;
-				GCC_ENABLE_SSE3_EXTENSIONS = YES;
-				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
-				GCC_FAST_OBJC_DISPATCH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"PROJECT_VERSION=\"$(CURRENT_PROJECT_VERSION)\"",
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_REUSE_STRINGS = YES;
-				GCC_STRICT_ALIASING = NO;
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				GCC_THREADSAFE_STATICS = YES;
-				GCC_UNROLL_LOOPS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_GLOBAL_CONSTRUCTORS = NO;
-				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
-				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
-				GCC_WARN_MISSING_PARENTHESES = YES;
-				GCC_WARN_PEDANTIC = YES;
-				GCC_WARN_SHADOW = YES;
-				LD_NO_PIE = NO;
-				LLVM_LTO = NO;
-				"LLVM_LTO[arch=x86_64]" = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				ONLY_ACTIVE_ARCH = NO;
-				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
-				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				RUN_CLANG_STATIC_ANALYZER = YES;
-				SDKROOT = "";
-				STRIP_INSTALLED_PRODUCT = NO;
-				VALID_ARCHS = "i386 x86_64";
-				WARNING_CFLAGS = (
-					"-pedantic",
-					"-Wall",
-					"-Wextra",
-					"-Wpointer-arith",
-					"-Wformat=2",
-					"-Wfloat-equal",
-					"-Wstrict-overflow=4",
-					"-Wbad-function-cast",
-					"-Winline",
-					"-Wconversion",
-				);
 			};
 			name = Debug;
 		};
 		6A57F70B13F5E614000BE6A9 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6A8F495614AC05470094EE00 /* Release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 0.1.0;
-				DEAD_CODE_STRIPPING = YES;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = unsupported;
-				GCC_ENABLE_SSE3_EXTENSIONS = YES;
-				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
-				GCC_FAST_OBJC_DISPATCH = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"PROJECT_VERSION=\"$(CURRENT_PROJECT_VERSION)\"",
-					"NDEBUG=1",
-				);
-				GCC_REUSE_STRINGS = YES;
-				GCC_STRICT_ALIASING = NO;
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				GCC_THREADSAFE_STATICS = YES;
-				GCC_UNROLL_LOOPS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_GLOBAL_CONSTRUCTORS = NO;
-				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
-				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
-				GCC_WARN_MISSING_PARENTHESES = YES;
-				GCC_WARN_PEDANTIC = YES;
-				GCC_WARN_SHADOW = YES;
-				LD_NO_PIE = NO;
-				LLVM_LTO = NO;
-				"LLVM_LTO[arch=x86_64]" = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				ONLY_ACTIVE_ARCH = NO;
-				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
-				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				RUN_CLANG_STATIC_ANALYZER = YES;
-				SDKROOT = "";
-				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};
 		6A57F70D13F5E614000BE6A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6A8F495714AC05470094EE00 /* fsevent_watch.xcconfig */;
 			buildSettings = {
-				INFOPLIST_FILE = Info.plist;
-				INFOPLIST_PREPROCESS = YES;
-				MACH_O_TYPE = mh_execute;
-				OTHER_LDFLAGS = (
-					"-sectcreate",
-					__TEXT,
-					__info_plist,
-					Info.plist,
-				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
 		6A57F70E13F5E614000BE6A9 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6A8F495714AC05470094EE00 /* fsevent_watch.xcconfig */;
 			buildSettings = {
-				INFOPLIST_FILE = Info.plist;
-				INFOPLIST_PREPROCESS = YES;
-				MACH_O_TYPE = mh_execute;
-				OTHER_LDFLAGS = (
-					"-sectcreate",
-					__TEXT,
-					__info_plist,
-					Info.plist,
-				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
