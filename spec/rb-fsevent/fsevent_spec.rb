@@ -10,6 +10,10 @@ describe FSEvent do
     end
   end
 
+  it "should allow watch calls to be chained" do
+    @fsevent.watch(@fixture_path).should respond_to(:watch)
+  end
+
   it "should have a watcher_path that resolves to an executable file" do
     File.exists?(FSEvent.watcher_path).should be_true
     File.executable?(FSEvent.watcher_path).should be_true

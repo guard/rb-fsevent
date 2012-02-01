@@ -25,6 +25,8 @@ class FSEvent
     else
       @options  = []
     end
+
+    self
   end
 
   def run
