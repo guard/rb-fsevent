@@ -14,6 +14,10 @@ class FSEvent
 
   attr_reader :paths, :callback
 
+  def initialize args = nil, &block
+    watch(args, &block) unless args.nil?
+  end
+
   def watch(watch_paths, options=nil, &block)
     @paths      = watch_paths.kind_of?(Array) ? watch_paths : [watch_paths]
     @callback   = block
