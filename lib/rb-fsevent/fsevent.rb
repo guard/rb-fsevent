@@ -60,7 +60,7 @@ class FSEvent
 
   if RUBY_VERSION < '1.9'
     def open_pipe
-      IO.popen("#{self.class.watcher_path} #{options_string} #{shellescaped_paths}")
+      IO.popen("'#{self.class.watcher_path}' #{options_string} #{shellescaped_paths}")
     end
 
     private
