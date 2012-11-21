@@ -1,3 +1,6 @@
+{<img src="https://codeclimate.com/badge.png" />}[https://codeclimate.com/github/thibaudgg/rb-fsevent]
+
+
 = rb-fsevent
 
 Very simple & usable Mac OSX FSEvents API
