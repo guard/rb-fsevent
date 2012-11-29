@@ -47,48 +47,48 @@ static void append_path(const char* path)
 #endif
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-  
+
 #ifdef DEBUG
   fprintf(stderr, "compiled against 10.6+, using CFURLCreateFileReferenceURL\n");
 #endif
-  
+
   CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8*)path, (CFIndex)strlen(path), false);
   CFURLRef placeholder = CFURLCopyAbsoluteURL(url);
   CFRelease(url);
-  
+
   CFMutableArrayRef imaginary = NULL;
-  
+
   // if we don't have an existing url, spin until we get to a parent that
   // does exist, saving any imaginary components for appending back later
   while(!CFURLResourceIsReachable(placeholder, NULL)) {
 #ifdef DEBUG
     fprintf(stderr, "path does not exist\n");
 #endif
-    
+
     CFStringRef child;
-    
+
     if (imaginary == NULL) {
       imaginary = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
     }
-    
+
     child = CFURLCopyLastPathComponent(placeholder);
     CFArrayInsertValueAtIndex(imaginary, 0, child);
     CFRelease(child);
-    
+
     url = CFURLCreateCopyDeletingLastPathComponent(NULL, placeholder);
     CFRelease(placeholder);
     placeholder = url;
-    
+
 #ifdef DEBUG
     fprintf(stderr, "parent: ");
     CFShow(placeholder);
 #endif
   }
-  
+
 #ifdef DEBUG
   fprintf(stderr, "path exists\n");
 #endif
-  
+
   // realpath() doesn't always return the correct case for a path, so this
   // is a funky workaround that converts a path into a (volId/inodeId) pair
   // and asks what the path should be for that. since it looks at the actual
@@ -98,12 +98,12 @@ static void append_path(const char* path)
   CFRelease(placeholder);
   placeholder = CFURLCreateFilePathURL(NULL, url, NULL);
   CFRelease(url);
-  
+
 #ifdef DEBUG
   fprintf(stderr, "path resolved to: ");
   CFShow(placeholder);
 #endif
-  
+
   // if we stripped off any imaginary path components, append them back on
   if (imaginary != NULL) {
     CFIndex count = CFArrayGetCount(imaginary);
@@ -119,30 +119,30 @@ static void append_path(const char* path)
     }
     CFRelease(imaginary);
   }
-  
+
 #ifdef DEBUG
   fprintf(stderr, "result: ");
   CFShow(placeholder);
 #endif
-  
+
   CFStringRef cfPath = CFURLCopyFileSystemPath(placeholder, kCFURLPOSIXPathStyle);
   CFArrayAppendValue(config.paths, cfPath);
   CFRelease(cfPath);
   CFRelease(placeholder);
-  
+
 #else
-  
+
 #ifdef DEBUG
   fprintf(stderr, "compiled against 10.5, using realpath()\n");
 #endif
-  
+
   char fullPath[PATH_MAX + 1];
-  
+
   if (realpath(path, fullPath) == NULL) {
 #ifdef DEBUG
     fprintf(stderr, "  realpath not directly resolvable from path\n");
 #endif
-    
+
     if (path[0] != '/') {
 #ifdef DEBUG
       fprintf(stderr, "  passed path is not absolute\n");
@@ -162,18 +162,18 @@ static void append_path(const char* path)
       strlcpy(fullPath, path, sizeof(fullPath));
     }
   }
-  
+
 #ifdef DEBUG
   fprintf(stderr, "  resolved path to: %s\n", fullPath);
   fprintf(stderr, "\n");
 #endif
-  
+
   CFStringRef pathRef = CFStringCreateWithCString(kCFAllocatorDefault,
                                                   fullPath,
                                                   kCFStringEncodingUTF8);
   CFArrayAppendValue(config.paths, pathRef);
   CFRelease(pathRef);
-  
+
 #endif
 }
 
@@ -249,7 +249,7 @@ static inline void parse_cli_settings(int argc, const char* argv[])
   fprintf(stderr, "config.latency      %f\n", config.latency);
 
 // STFU clang
-#if __LP64__
+#if defined(__LP64__)
   fprintf(stderr, "config.flags        %#.8x\n", config.flags);
 #else
   fprintf(stderr, "config.flags        %#.8lx\n", config.flags);
@@ -382,7 +382,7 @@ static void callback(__attribute__((unused)) FSEventStreamRef streamRef,
     fprintf(stderr, "  event ID: %llu\n", eventIds[i]);
 
 // STFU clang
-#if __LP64__
+#if defined(__LP64__)
     fprintf(stderr, "  event flags: %#.8x\n", eventFlags[i]);
 #else
     fprintf(stderr, "  event flags: %#.8lx\n", eventFlags[i]);

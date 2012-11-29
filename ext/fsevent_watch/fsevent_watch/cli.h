@@ -1,6 +1,8 @@
 #ifndef CLI_H
 #define CLI_H
 
+#include "common.h"
+
 #ifndef CLI_NAME
 #define CLI_NAME "fsevent_watch"
 #endif /* CLI_NAME */
@@ -10,12 +12,9 @@
 #endif /* PROJECT_VERSION */
 
 #ifndef CLI_VERSION
-#define _str(s) #s
-#define _xstr(s) _str(s)
 #define CLI_VERSION _xstr(PROJECT_VERSION)
 #endif /* CLI_VERSION */
 
-#include "common.h"
 
 struct cli_info {
   UInt64 since_when_arg;

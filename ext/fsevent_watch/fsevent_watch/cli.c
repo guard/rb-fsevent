@@ -134,13 +134,11 @@ int cli_parser (int argc, const char** argv, struct cli_info* args_info)
     case 'V': // version
       cli_print_version();
       exit(EXIT_SUCCESS);
-      break;
     case 'h': // help
     case '?': // invalid option
     case ':': // missing argument
       cli_print_help();
       exit((c == 'h') ? EXIT_SUCCESS : EXIT_FAILURE);
-      break;
     }
   }
 

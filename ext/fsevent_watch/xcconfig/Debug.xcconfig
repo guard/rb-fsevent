@@ -1,6 +1,10 @@
 #include "Common.xcconfig"
 
 
+// code signing
+CODE_SIGN_IDENTITY =
+
+
 // deployment
 COPY_PHASE_STRIP = NO
 STRIP_INSTALLED_PRODUCT = NO
@@ -9,10 +13,11 @@ STRIP_INSTALLED_PRODUCT = NO
 // code generation
 GCC_OPTIMIZATION_LEVEL = 0
 GCC_GENERATE_DEBUGGING_SYMBOLS = YES
+GCC_INLINES_ARE_PRIVATE_EXTERN = NO
 
 
 // language
-OTHER_CFLAGS = $(COMMON_CFLAGS) -fcatch-undefined-behavior -ftrapv -fverbose-asm
+OTHER_CFLAGS = $(COMMON_CFLAGS)
 
 
 // preprocessing

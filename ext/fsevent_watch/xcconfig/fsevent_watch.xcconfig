@@ -10,7 +10,7 @@ PRODUCT_NAME = $(TARGET_NAME)
 
 
 // versioning
-CURRENT_PROJECT_VERSION = 0.1.1
+CURRENT_PROJECT_VERSION = 0.1.2
 
 
 // preprocessing
