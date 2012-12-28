@@ -43,7 +43,7 @@ class FSEvent
         callback.call(modified_dir_paths)
       end
     end
-  rescue Interrupt, IOError
+  rescue Interrupt, IOError, Errno::EBADF
   ensure
     stop
   end
