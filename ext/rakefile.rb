@@ -1,6 +1,7 @@
 require 'rubygems' unless defined?(Gem)
 require 'pathname'
 require 'date'
+require 'time'
 
 
 raise "unable to find xcodebuild" unless system('which', 'xcodebuild')
@@ -14,10 +15,11 @@ $final_exe = $this_dir.parent.join('bin/fsevent_watch')
 $src_dir = $this_dir.join('fsevent_watch')
 $obj_dir = $this_dir.join('build')
 
-
 SRC = Pathname.glob("#{$src_dir}/*.c")
 OBJ = SRC.map {|s| $obj_dir.join("#{s.basename('.c')}.o")}
 
+
+$now = DateTime.now.xmlschema rescue Time.now.xmlschema
 
 $CC = ENV['CC'] || `which clang || which gcc`.strip
 $CFLAGS = ENV['CFLAGS'] || '-fconstant-cfstrings -fstrict-aliasing -funroll-loops'
@@ -47,9 +49,9 @@ task :get_sdk_info => :sw_vers do
   version_info.strip.each_line do |line|
     next if line.strip.empty?
     next unless line.include?(':')
-    match = line.match(/(?<key>[^:]*): (?<value>.*)/)
+    match = line.match(/([^:]*): (.*)/)
     next unless match
-    $SDK_INFO[match[:key]] = match[:value]
+    $SDK_INFO[match[1]] = match[2]
   end
 end
 
@@ -138,7 +140,7 @@ file $obj_dir.join('Info.plist').to_s => [$obj_dir.to_s, :setup_env] do
     file << '<key>BuildMachineOSVersion</key>'
     file << "<string>#{$mac_product_version}</string>"
     file << '<key>FSEWCompiledAt</key>'
-    file << "<string>#{DateTime.now.xmlschema}</string>"
+    file << "<string>#{$now}</string>"
     file << '<key>FSEWVersionInfoBuilder</key>'
     file << "<string>#{`whoami`.strip}</string>"
     file << '<key>FSEWBuildTriple</key>'
