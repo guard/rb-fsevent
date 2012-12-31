@@ -7,13 +7,60 @@ Very simple & usable Mac OSX FSEvents API
 
 - RubyCocoa not required!
 - Signals are working (really)
-- Tested on MRI 1.8.7 & 1.9.2, JRuby 1.6.3
-- Tested on 10.6 & 10.7 (though 10.5 should work just as well)
-- Tested with XCode 3.2.6, 4.0.2, 4.1, 4.2b5
+- Tested on MRI 1.8.7 & 1.9.3, RBX 2.0.0dev, JRuby
+- Tested on 10.6 -> 10.8 (though 10.5 should work just as well)
 
 == Install
 
     gem install rb-fsevent
+
+=== re-compilation
+
+rb-fsevent comes with a pre-compiled fsevent_watch binary supporting x86_64 and i386 on 10.6 and above. The binary is codesigned with my (Travis Tilley) Developer ID as an extra precaution when distributing pre-compiled code and contains an embedded plist describing its build environment. This should be sufficient for most users, but if you need to use rb-fsevent on 10.5 and/or on PPC then recompilation is necessary. This can be done by entering the installed gem's ext directory and running:
+
+    MACOSX_DEPLOYMENT_TARGET="10.5" CC=/usr/bin/gcc-4.2 rake ppc replace_exe
+
+The following ENV vars are recognized:
+
+- CC
+- CFLAGS
+- ARCHFLAGS
+- MACOSX_DEPLOYMENT_TARGET
+- FWDEBUG (enables debug mode, printing an obscene number of informational messages to STDERR)
+
+=== embedded plist
+
+You can output the embedded plist showing build environment details for a specific fsevent_watch via:
+
+    otool -s __TEXT __info_plist ./bin/fsevent_watch | grep ^0 | xxd -r -
+
+This should contain details such as:
+
+    <key>CFBundleVersion</key>
+    <string>0.1.3</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.6</string>
+    <key>FSEWCompiledAt</key>
+    <string>2012-12-31T12:25:03-05:00</string>
+    <key>FSEWVersionInfoBuilder</key>
+    <string>travistilley</string>
+    <key>FSEWCC</key>
+    <string>/usr/local/bin/clang</string>
+    <key>FSEWCFLAGS</key>
+    <string>-fconstant-cfstrings -fstrict-aliasing -funroll-loops -mmacosx-version-min=10.6 -O3</string>
+
+=== codesign
+
+You can verify code signing information for a specific fsevent_watch via:
+
+    codesign -d -vvv ./bin/fsevent_watch
+
+If you're using the pre-compiled binary, then the output should contain something to the effect of:
+
+    Authority=Developer ID Application: Travis Tilley
+    Authority=Developer ID Certification Authority
+    Authority=Apple Root CA
+    Timestamp=Dec 31, 2012 12:49:13 PM
 
 == Usage
 
@@ -110,7 +157,7 @@ WARNING: passing in 0 as the parameter to :since_when will return events for eve
 
 == Debugging output
 
-If the gem is installed with the environment variable FWDEBUG set to the string "true", then fsevent_watch will be built with its various DEBUG sections defined, and the output to STDERR is truly verbose (and hopefully helpful in debugging your application and not just fsevent_watch itself). If enough people find this to be directly useful when developing code that makes use of rb-fsevent, then it wouldn't be hard to clean this up and make it a feature enabled by a commandline argument instead. Until somebody files an issue, however, I will assume otherwise.
+If the gem is re-compiled with the environment variable FWDEBUG set, then fsevent_watch will be built with its various DEBUG sections defined, and the output to STDERR is truly verbose (and hopefully helpful in debugging your application and not just fsevent_watch itself). If enough people find this to be directly useful when developing code that makes use of rb-fsevent, then it wouldn't be hard to clean this up and make it a feature enabled by a commandline argument instead. Until somebody files an issue, however, I will assume otherwise.
 
     append_path called for: /tmp/moo/cow/
       resolved path to: /private/tmp/moo/cow
