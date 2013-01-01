@@ -106,6 +106,7 @@ class FSEvent
     opts.concat(['--latency', options[:latency]]) if options[:latency]
     opts.push('--no-defer') if options[:no_defer]
     opts.push('--watch-root') if options[:watch_root]
+    opts.push('--file-events') if options[:file_events]
     # ruby 1.9's IO.popen(array-of-stuff) syntax requires all items to be strings
     opts.map {|opt| "#{opt}"}
   end
