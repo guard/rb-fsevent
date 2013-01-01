@@ -34,7 +34,7 @@ You can retrieve the values in the embedded plist via the CLI:
 
     fsevent_watch --show-plist
 
-The output is essentially formatted as `"#{key}:n  #{value}n"` to make it easier to read than plist style xml. The result looks like this:
+The output is essentially formatted as `"#{key}:\n  #{value}\n"` to make it easier to read than plist style xml. The result looks like this:
 
     DTSDKName:
       macosx10.5
