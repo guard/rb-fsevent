@@ -30,24 +30,28 @@ The following ENV vars are recognized:
 
 === embedded plist
 
-You can output the embedded plist showing build environment details for a specific fsevent_watch via:
+You can retrieve the values in the embedded plist via the CLI:
+
+    fsevent_watch --show-plist
+
+The output is essentially formatted as "#{key}:\n  #{value}\n" to make it easier to read than plist style xml. The result looks like this:
+
+    DTSDKName:
+      macosx10.5
+    FSEWBuildTriple:
+      i386-apple-darwin10.8.0
+    FSEWCC:
+      /usr/bin/gcc-4.2
+    DTSDKPath:
+      /Developer/SDKs/MacOSX10.5.sdk
+    FSEWCCVersion:
+      i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5666) (dot 3)
+    FSEWCFLAGS:
+      -fconstant-cfstrings -fno-strict-aliasing -Wall -mmacosx-version-min=10.5 -O3
+
+If, for some perverse reason, you prefer to look at the xml... it can be retrieved via:
 
     otool -s __TEXT __info_plist ./bin/fsevent_watch | grep ^0 | xxd -r -
-
-This should contain details such as:
-
-    <key>CFBundleVersion</key>
-    <string>0.1.3</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>10.6</string>
-    <key>FSEWCompiledAt</key>
-    <string>2012-12-31T12:25:03-05:00</string>
-    <key>FSEWVersionInfoBuilder</key>
-    <string>travistilley</string>
-    <key>FSEWCC</key>
-    <string>/usr/local/bin/clang</string>
-    <key>FSEWCFLAGS</key>
-    <string>-fconstant-cfstrings -fstrict-aliasing -funroll-loops -mmacosx-version-min=10.6 -O3</string>
 
 === codesign
 
