@@ -1,13 +1,14 @@
+# -*- encoding: utf-8 -*-
 require 'rubygems' unless defined?(Gem)
 require 'pathname'
 require 'date'
 require 'time'
-
+require 'rake/clean'
 
 raise "unable to find xcodebuild" unless system('which', 'xcodebuild')
 
-FSEVENT_WATCH_EXE_VERSION = '0.1.3'
 
+FSEVENT_WATCH_EXE_VERSION = '0.1.3'
 
 $this_dir = Pathname.new(__FILE__).dirname.expand_path
 $final_exe = $this_dir.parent.join('bin/fsevent_watch')
@@ -18,21 +19,30 @@ $obj_dir = $this_dir.join('build')
 SRC = Pathname.glob("#{$src_dir}/*.c")
 OBJ = SRC.map {|s| $obj_dir.join("#{s.basename('.c')}.o")}
 
-
 $now = DateTime.now.xmlschema rescue Time.now.xmlschema
 
 $CC = ENV['CC'] || `which clang || which gcc`.strip
-$CFLAGS = ENV['CFLAGS'] || '-fconstant-cfstrings -fstrict-aliasing -funroll-loops'
+$CFLAGS = ENV['CFLAGS'] || '-fconstant-cfstrings -fno-strict-aliasing -Wall'
 $ARCHFLAGS = ENV['ARCHFLAGS'] || '-arch x86_64 -arch i386'
 $DEFINES = "-DNS_BUILD_32_LIKE_64 -DNS_BLOCK_ASSERTIONS -DOS_OBJECT_USE_OBJC=0 -DPROJECT_VERSION=#{FSEVENT_WATCH_EXE_VERSION}"
 
-$GCC_C_LANGUAGE_STANDARD = 'gnu99'
+$GCC_C_LANGUAGE_STANDARD = ENV['GCC_C_LANGUAGE_STANDARD'] || 'gnu99'
+
+# generic developer id name so it'll match correctly for anyone who has only
+# one developer id in their keychain (not that I expect anyone else to bother)
 $CODE_SIGN_IDENTITY = 'Developer ID Application'
 
 $arch = `uname -m`.strip
 $os_release = `uname -r`.strip
 $BUILD_TRIPLE = "#{$arch}-apple-darwin#{$os_release}"
 
+$CCVersion = `#{$CC} --version | head -n 1`.strip
+
+
+CLEAN.include OBJ.map(&:to_s)
+CLEAN.include $obj_dir.join('Info.plist').to_s
+CLEAN.include $obj_dir.join('fsevent_watch').to_s
+CLOBBER.include $final_exe.to_s
 
 
 task :sw_vers do
@@ -112,48 +122,72 @@ SRC.zip(OBJ).each do |source, object|
   end
 end
 
-desc 'generate an Info.plist used for code signing as well as embedding build settings into the resulting binary'
 file $obj_dir.join('Info.plist').to_s => [$obj_dir.to_s, :setup_env] do
   File.open($obj_dir.join('Info.plist').to_s, 'w+') do |file|
-    file << '<?xml version="1.0" encoding="UTF-8"?>'
-    file << '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">'
-    file << '<plist version="1.0">'
-    file << '<dict>'
+    indentation = ''
+    indent      =  lambda {|num|    indentation = ' ' * num               }
+    add         =  lambda {|str| file << "#{indentation}#{str}\n"   }
+    key         =  lambda {|str| add["<key>#{str}</key>"]           }
+    string      =  lambda {|str| add["<string>#{str}</string>"]     }
 
-    file << '<key>CFBundleExecutable</key>'
-    file << '<string>fsevent_watch</string>'
-    file << '<key>CFBundleIdentifier</key>'
-    file << '<string>com.teaspoonofinsanity.fsevent_watch</string>'
-    file << '<key>CFBundleName</key>'
-    file << '<string>fsevent_watch</string>'
 
-    file << '<key>CFBundleVersion</key>'
-    file << "<string>#{FSEVENT_WATCH_EXE_VERSION}</string>"
-    file << '<key>LSMinimumSystemVersion</key>'
-    file << "<string>#{$MACOSX_DEPLOYMENT_TARGET}</string>"
-    file << '<key>DTSDKBuild</key>'
-    file << "<string>#{$SDK_INFO['ProductBuildVersion']}</string>"
-    file << '<key>DTSDKName</key>'
-    file << "<string>macosx#{$SDK_INFO['SDKVersion']}</string>"
-    file << '<key>BuildMachineOSBuild</key>'
-    file << "<string>#{$mac_build_version}</string>"
-    file << '<key>BuildMachineOSVersion</key>'
-    file << "<string>#{$mac_product_version}</string>"
-    file << '<key>FSEWCompiledAt</key>'
-    file << "<string>#{$now}</string>"
-    file << '<key>FSEWVersionInfoBuilder</key>'
-    file << "<string>#{`whoami`.strip}</string>"
-    file << '<key>FSEWBuildTriple</key>'
-    file << "<string>#{$BUILD_TRIPLE}</string>"
-    file << '<key>FSEWCC</key>'
-    file << "<string>#{$CC}</string>"
-    file << '<key>FSEWCFLAGS</key>'
-    file << "<string>#{$CFLAGS}</string>"
+    add['<?xml version="1.0" encoding="UTF-8"?>']
+    add['<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">']
+    add['<plist version="1.0">']
 
-    file << '</dict>'
-    file << '</plist>'
+    indent[2]
+    add['<dict>']
+    indent[4]
+
+    key['CFBundleExecutable']
+    string['fsevent_watch']
+    key['CFBundleIdentifier']
+    string['com.teaspoonofinsanity.fsevent_watch']
+    key['CFBundleName']
+    string['fsevent_watch']
+    key['CFBundleDisplayName']
+    string['FSEvent Watch CLI']
+    key['NSHumanReadableCopyright']
+    string['Copyright (C) 2011-2013 Travis Tilley']
+
+    key['CFBundleVersion']
+    string["#{FSEVENT_WATCH_EXE_VERSION}"]
+    key['LSMinimumSystemVersion']
+    string["#{$MACOSX_DEPLOYMENT_TARGET}"]
+    key['DTSDKBuild']
+    string["#{$SDK_INFO['ProductBuildVersion']}"]
+    key['DTSDKName']
+    string["macosx#{$SDK_INFO['SDKVersion']}"]
+    key['DTSDKPath']
+    string["#{$SDK_INFO['Path']}"]
+    key['BuildMachineOSBuild']
+    string["#{$mac_build_version}"]
+    key['BuildMachineOSVersion']
+    string["#{$mac_product_version}"]
+    key['FSEWCompiledAt']
+    string["#{$now}"]
+    key['FSEWVersionInfoBuilder']
+    string["#{`whoami`.strip}"]
+    key['FSEWBuildTriple']
+    string["#{$BUILD_TRIPLE}"]
+    key['FSEWCC']
+    string["#{$CC}"]
+    key['FSEWCCVersion']
+    string["#{$CCVersion}"]
+    key['FSEWCFLAGS']
+    string["#{$CFLAGS}"]
+
+    indent[2]
+    add['</dict>']
+    indent[0]
+
+    add['</plist>']
   end
 end
+
+desc 'generate an Info.plist used for code signing as well as embedding build settings into the resulting binary'
+task :plist => $obj_dir.join('Info.plist').to_s
+
 
 file $obj_dir.join('fsevent_watch').to_s => [$obj_dir.to_s, $obj_dir.join('Info.plist').to_s] + OBJ.map(&:to_s) do
   cmd = [
@@ -187,5 +221,5 @@ task :replace_exe => :build do
   sh "mv #{$obj_dir.join('fsevent_watch')} #{$final_exe}"
 end
 
-task :default => :replace_exe
+task :default => [:replace_exe, :clean]
 

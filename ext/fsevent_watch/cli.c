@@ -6,6 +6,7 @@ const char* cli_info_usage = "Usage: fsevent_watch [OPTIONS]... [PATHS]...";
 const char* cli_info_help[] = {
   "  -h, --help                you're looking at it",
   "  -V, --version             print version number and exit",
+  "  -p, --show-plist          display the embedded Info.plist values",
   "  -s, --since-when=EventID  fire historical events since ID",
   "  -l, --latency=seconds     latency period (default='0.5')",
   "  -n, --no-defer            enable no-defer latency modifier",
@@ -56,12 +57,40 @@ void cli_parser_free (struct cli_info* args_info)
   cli_parser_release(args_info);
 }
 
+static void cli_print_info_dict (const void *key,
+                                 const void *value,
+                                 void *context)
+{
+  CFStringRef entry = CFStringCreateWithFormat(NULL, NULL,
+    CFSTR("%@:\n  %@"), key, value);
+  if (entry) {
+    CFShow(entry);
+    CFRelease(entry);
+  }
+}
+
+void cli_show_plist (void)
+{
+  CFBundleRef mainBundle = CFBundleGetMainBundle();
+  CFRetain(mainBundle);
+  CFDictionaryRef mainBundleDict = CFBundleGetInfoDictionary(mainBundle);
+  if (mainBundleDict) {
+    CFRetain(mainBundleDict);
+    printf("Embedded Info.plist metadata:\n\n");
+    CFDictionaryApplyFunction(mainBundleDict, cli_print_info_dict, NULL);
+    CFRelease(mainBundleDict);
+  }
+  CFRelease(mainBundle);
+  printf("\n");
+}
+
 void cli_print_version (void)
 {
   printf("%s %s\n", CLI_NAME, CLI_VERSION);
 #ifdef COMPILED_AT
   printf("Compiled %s\n", COMPILED_AT);
 #endif
+  printf("\n");
 }
 
 void cli_print_help (void)
@@ -83,6 +112,7 @@ int cli_parser (int argc, const char** argv, struct cli_info* args_info)
   static struct option longopts[] = {
     { "help",         no_argument,        NULL, 'h' },
     { "version",      no_argument,        NULL, 'V' },
+    { "show-plist",   no_argument,        NULL, 'p' },
     { "since-when",   required_argument,  NULL, 's' },
     { "latency",      required_argument,  NULL, 'l' },
     { "no-defer",     no_argument,        NULL, 'n' },
@@ -93,7 +123,7 @@ int cli_parser (int argc, const char** argv, struct cli_info* args_info)
     { 0, 0, 0, 0 }
   };
 
-  const char* shortopts = "hVs:l:nriFf:";
+  const char* shortopts = "hVps:l:nriFf:";
 
   int c = -1;
 
@@ -133,6 +163,9 @@ int cli_parser (int argc, const char** argv, struct cli_info* args_info)
       break;
     case 'V': // version
       cli_print_version();
+      exit(EXIT_SUCCESS);
+    case 'p': // show-plist
+      cli_show_plist();
       exit(EXIT_SUCCESS);
     case 'h': // help
     case '?': // invalid option
