@@ -86,9 +86,15 @@ void cli_show_plist (void)
 
 void cli_print_version (void)
 {
-  printf("%s %s\n", CLI_NAME, CLI_VERSION);
+  printf("%s %s\n\n", CLI_NAME, CLI_VERSION);
 #ifdef COMPILED_AT
-  printf("Compiled %s\n", COMPILED_AT);
+  printf("Compiled at:    %s\n", COMPILED_AT);
+#endif
+#ifdef COMPILER
+  printf("Compiled with:  %s\n", COMPILER);
+#endif
+#ifdef TARGET_CPU
+  printf("Compiled for:   %s\n", TARGET_CPU);
 #endif
   printf("\n");
 }
