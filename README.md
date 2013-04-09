@@ -212,90 +212,8 @@ If the gem is re-compiled with the environment variable FWDEBUG set, then fseven
       event path: /private/tmp/moo/cow/1/d/
       event flags: 00000000
       event ID: 1023812
-      event path: /private/tmp/moo/cow/1/e/
-      event flags: 00000000
-      event ID: 1023827
-      event path: /private/tmp/moo/cow/1/f/
-      event flags: 00000000
-      event ID: 1023842
-      event path: /private/tmp/moo/cow/1/g/
-      event flags: 00000000
-      event ID: 1023857
-      event path: /private/tmp/moo/cow/1/h/
-      event flags: 00000000
-      event ID: 1023872
-      event path: /private/tmp/moo/cow/1/i/
-      event flags: 00000000
-      event ID: 1023887
-      event path: /private/tmp/moo/cow/1/j/
-      event flags: 00000000
-      event ID: 1023902
-      event path: /private/tmp/moo/cow/1/k/
-      event flags: 00000000
-      event ID: 1023917
-      event path: /private/tmp/moo/cow/1/l/
-      event flags: 00000000
-      event ID: 1023932
-      event path: /private/tmp/moo/cow/1/m/
-      event flags: 00000000
-      event ID: 1023947
-      event path: /private/tmp/moo/cow/1/n/
-      event flags: 00000000
-      event ID: 1023962
-      event path: /private/tmp/moo/cow/1/o/
-      event flags: 00000000
-      event ID: 1023977
-      event path: /private/tmp/moo/cow/1/p/
-      event flags: 00000000
-      event ID: 1023992
-      event path: /private/tmp/moo/cow/1/q/
-      event flags: 00000000
-      event ID: 1024007
-      event path: /private/tmp/moo/cow/1/r/
-      event flags: 00000000
-      event ID: 1024022
-      event path: /private/tmp/moo/cow/1/s/
-      event flags: 00000000
-      event ID: 1024037
-      event path: /private/tmp/moo/cow/1/t/
-      event flags: 00000000
-      event ID: 1024052
-      event path: /private/tmp/moo/cow/1/u/
-      event flags: 00000000
-      event ID: 1024067
-      event path: /private/tmp/moo/cow/1/v/
-      event flags: 00000000
-      event ID: 1024082
-      event path: /private/tmp/moo/cow/1/w/
-      event flags: 00000000
-      event ID: 1024097
-      event path: /private/tmp/moo/cow/1/x/
-      event flags: 00000000
-      event ID: 1024112
-      event path: /private/tmp/moo/cow/1/y/
-      event flags: 00000000
-      event ID: 1024127
-      event path: /private/tmp/moo/cow/1/z/
-      event flags: 00000000
-      event ID: 1024142
-      event path: /private/tmp/moo/cow/1/
-      event flags: 00000000
-      event ID: 1024145
-      event path: /private/tmp/moo/cow/2/a/
-      event flags: 00000000
-      event ID: 1024160
-      event path: /private/tmp/moo/cow/2/b/
-      event flags: 00000000
-      event ID: 1024175
-      event path: /private/tmp/moo/cow/2/c/
-      event flags: 00000000
-      event ID: 1024190
-      event path: /private/tmp/moo/cow/2/d/
-      event flags: 00000000
-      event ID: 1024205
-      event path: /private/tmp/moo/cow/2/e/
-      event flags: 00000000
-      event ID: 1024220
+      [etc]
+
 
 ## Note about FFI
 
@@ -314,6 +232,12 @@ The list of tested targets is currently:
 
     %w[1.8.7-p371 1.9.3-p362 2.0.0-dev rbx-2.0.0-dev jruby-1.7.1]
 
+## Donations
+
+rb-fsevent is truly free software. The license is quite liberal (you don't even have to contribute back your changes). If, however, you'd like to donate as a way of showing support for the project and its continued development:
+
+[![Donate Bitcoins](https://d2o7j92jk8qjiw.cloudfront.net/assets/buttons/donation_small-2d08f8cd93c98acf496e0411cc6a5262.png)](https://coinbase.com/checkouts/5233986321e2217499bd6ef91f679aa4?c=rb-fsevent)
+    
 ## Authors
 
 * [Travis Tilley](http://github.com/ttilley)
