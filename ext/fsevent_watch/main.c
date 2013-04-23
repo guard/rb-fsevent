@@ -451,35 +451,6 @@ static void callback(__attribute__((unused)) FSEventStreamRef streamRef,
 
 int main(int argc, const char* argv[])
 {
-  /*
-   * a subprocess will initially inherit the process group of its parent. the
-   * process group may have a control terminal associated with it, which would
-   * be the first tty device opened by the group leader. typically the group
-   * leader is your shell and the control terminal is your login device. a
-   * subset of signals triggered on the control terminal are sent to all members
-   * of the process group, in large part to facilitate sane and consistent
-   * cleanup (ex: control terminal was closed).
-   *
-   * so why the overly descriptive lecture style comment?
-   *   1. SIGINT and SIGQUIT are among the signals with this behavior
-   *   2. a number of applications gank the above for their own use
-   *   3. ruby's insanely useful "guard" is one of these applications
-   *   4. despite having some level of understanding of POSIX signals and a few
-   *      of the scenarios that might cause problems, i learned this one only
-   *      after reading ruby 1.9's process.c
-   *   5. if left completely undocumented, even slightly obscure bugfixes
-   *      may be removed as cruft by a future maintainer
-   *
-   * hindsight is 20/20 addition: if you're single-threaded and blocking on IO
-   * with a subprocess, then handlers for deferrable signals might not get run
-   * when you expect them to. In the case of Ruby 1.8, that means making use of
-   * IO::select, which will preserve correct signal handling behavior.
-   */
-  if (setpgid(0,0) < 0) {
-    fprintf(stderr, "Unable to set new process group.\n");
-    return 1;
-  }
-
   parse_cli_settings(argc, argv);
 
   FSEventStreamContext context = {0, NULL, NULL, NULL, NULL};
