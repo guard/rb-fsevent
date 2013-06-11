@@ -18,3 +18,8 @@ FSEventStreamEventFlags   kFSEventStreamEventFlagItemIsFile         = 0x00010000
 FSEventStreamEventFlags   kFSEventStreamEventFlagItemIsDir          = 0x00020000;
 FSEventStreamEventFlags   kFSEventStreamEventFlagItemIsSymlink      = 0x00040000;
 #endif
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 1090
+FSEventStreamCreateFlags  kFSEventStreamCreateFlagMarkSelf          = 0x00000020;
+FSEventStreamEventFlags   kFSEventStreamEventFlagOwnEvent           = 0x00080000;
+#endif

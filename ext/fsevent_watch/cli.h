@@ -23,6 +23,7 @@ struct cli_info {
   bool watch_root_flag;
   bool ignore_self_flag;
   bool file_events_flag;
+  bool mark_self_flag;
   enum FSEventWatchOutputFormat format_arg;
 
   char** inputs;

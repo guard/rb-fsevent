@@ -37,4 +37,11 @@ extern FSEventStreamEventFlags  kFSEventStreamEventFlagItemCreated,
                                 kFSEventStreamEventFlagItemIsSymlink;
 #endif
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 1090
+// marking, rather than ignoring, events originating from the current process introduced in 10.9
+extern FSEventStreamCreateFlags kFSEventStreamCreateFlagMarkSelf;
+extern FSEventStreamEventFlags  kFSEventStreamEventFlagOwnEvent;
+#endif
+
+
 #endif // fsevent_watch_compat_h

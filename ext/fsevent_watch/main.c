@@ -234,6 +234,15 @@ static inline void parse_cli_settings(int argc, const char* argv[])
     }
   }
 
+  if (args_info.mark_self_flag) {
+    if ((osMajorVersion == 10) & (osMinorVersion >= 9)) {
+      config.flags |= kFSEventStreamCreateFlagMarkSelf;
+    } else {
+      fprintf(stderr, "MacOSX 10.9 or later required for --mark-self\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+
   if (args_info.inputs_num == 0) {
     append_path(".");
   } else {

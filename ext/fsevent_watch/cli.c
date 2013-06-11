@@ -26,6 +26,7 @@ static void default_args (struct cli_info* args_info)
   args_info->watch_root_flag    = false;
   args_info->ignore_self_flag   = false;
   args_info->file_events_flag   = false;
+  args_info->mark_self_flag     = false;
   args_info->format_arg         = kFSEventWatchOutputFormatClassic;
 }
 
@@ -125,6 +126,7 @@ int cli_parser (int argc, const char** argv, struct cli_info* args_info)
     { "watch-root",   no_argument,        NULL, 'r' },
     { "ignore-self",  no_argument,        NULL, 'i' },
     { "file-events",  no_argument,        NULL, 'F' },
+    { "mark-self",    no_argument,        NULL, 'm' },
     { "format",       required_argument,  NULL, 'f' },
     { 0, 0, 0, 0 }
   };
@@ -152,6 +154,9 @@ int cli_parser (int argc, const char** argv, struct cli_info* args_info)
       break;
     case 'F': // file-events
       args_info->file_events_flag = true;
+      break;
+    case 'm': // mark-self
+      args_info->mark_self_flag = true;
       break;
     case 'f': // format
       if (strcmp(optarg, "classic") == 0) {
