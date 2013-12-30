@@ -1,4 +1,6 @@
-Copyright (c) 2010-2013 Thibaud Guillaume-Gentil & Travis Tilley
+Copyright (c) 2010-2014 Thibaud Guillaume-Gentil & Travis Tilley
+
+MIT License
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
