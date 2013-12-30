@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://rubygems.org/gems/rb-fsevent"
   s.summary     = "Very simple & usable FSEvents API"
   s.description = "FSEvents API with Signals catching (without RubyCocoa)"
+  s.license     = "MIT"
 
   s.rubyforge_project = "rb-fsevent"
 
