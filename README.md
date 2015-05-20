@@ -7,8 +7,14 @@ Very simple & usable Mac OSX FSEvents API
 
 * RubyCocoa not required!
 * Signals are working (really)
-* Tested on MRI 1.8.7 & 1.9.3, RBX 2.0.0dev, JRuby
-* Tested on 10.6 -> 10.8 (though 10.5 should work just as well)
+* Tested on MRI 2.1, RBX 2.5, JRuby
+* Tested on 10.10
+
+## HFS+ filename corruption bug
+
+There is a _very_ long-standing (since 2011) OSX bug where sometimes the filename metadata for HFS+ filesystems will get corrupted, resulting in some APIs returning one case for a file, and other APIs returning another. This corruption is not currently fixed by their tools, though Apple has been made aware of the issue and are working on it (as of may 2015). The result is that sometimes, _for no visible reason to the user_, fsevents would simply not work. As of rb-fsevent 0.9.5 this issue is properly detected and an insanely hacky (but effective) workaround is used that replaces the system `realpath()` with a custom implementation that should always return the same value as the kernel reporting (thus fixing fsevents).
+
+Please note that this doesn't repair the underlying issue on disk. Other apps and libraries using fsevents will continue to break with no warning. There may be other issues unrelated to fsevents.
 
 ## Install
 
@@ -16,9 +22,9 @@ Very simple & usable Mac OSX FSEvents API
 
 ### re-compilation
 
-rb-fsevent comes with a pre-compiled fsevent\_watch binary supporting x86\_64 and i386 on 10.6 and above. The binary is codesigned with my (Travis Tilley) Developer ID as an extra precaution when distributing pre-compiled code and contains an embedded plist describing its build environment. This should be sufficient for most users, but if you need to use rb-fsevent on 10.5 and/or on PPC then recompilation is necessary. This can be done by entering the installed gem's ext directory and running:
+rb-fsevent comes with a pre-compiled fsevent\_watch binary supporting x86\_64 on 10.9 and above. The binary is codesigned with my (Travis Tilley) Developer ID as an extra precaution when distributing pre-compiled code and contains an embedded plist describing its build environment. This should be sufficient for most users, but if you need to use rb-fsevent on 10.8 or lower then recompilation is necessary. This can be done by entering the installed gem's ext directory and running:
 
-    MACOSX_DEPLOYMENT_TARGET="10.5" CC=/usr/bin/gcc-4.2 rake ppc replace_exe
+    MACOSX_DEPLOYMENT_TARGET="10.7" rake replace_exe
 
 The following ENV vars are recognized:
 
@@ -216,10 +222,6 @@ If the gem is re-compiled with the environment variable FWDEBUG set, then fseven
       [etc]
 
 
-## Note about FFI
-
-rb-fsevent doesn't use [ruby-ffi](http://github.com/ffi/ffi) anymore because it sadly doesn't allow for catching Signals. You can still see the code in the [ffi branch](http://github.com/thibaudgg/rb-fsevent/tree/ffi).
-
 ## Development
 
 * Source hosted at [GitHub](http://github.com/thibaudgg/rb-fsevent)
@@ -231,15 +233,10 @@ Pull requests are quite welcome! Please ensure that your commits are in a topic 
 
 The list of tested targets is currently:
 
-    %w[1.8.7-p371 1.9.3-p362 2.0.0-dev rbx-2.0.0-dev jruby-1.7.1]
+    %w[2.2.2 2.3.0-dev rbx-2.5.5 jruby-1.7.9]
 
-## Donations
-
-rb-fsevent is truly free software. The license is quite liberal (you don't even have to contribute back your changes). If, however, you'd like to donate as a way of showing support for the project and its continued development:
-
-[![Donate Bitcoins](https://d2o7j92jk8qjiw.cloudfront.net/assets/buttons/donation_small-2d08f8cd93c98acf496e0411cc6a5262.png)](https://coinbase.com/checkouts/5233986321e2217499bd6ef91f679aa4?c=rb-fsevent)
-    
 ## Authors
 
 * [Travis Tilley](http://github.com/ttilley)
 * [Thibaud Guillaume-Gentil](http://github.com/thibaudgg)
+* [Andrey Tarantsov](https://github.com/andreyvit)
