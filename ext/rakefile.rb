@@ -8,7 +8,7 @@ require 'rake/clean'
 raise "unable to find xcodebuild" unless system('which', 'xcodebuild')
 
 
-FSEVENT_WATCH_EXE_VERSION = '0.1.3'
+FSEVENT_WATCH_EXE_VERSION = '0.1.4'
 
 $this_dir = Pathname.new(__FILE__).dirname.expand_path
 $final_exe = $this_dir.parent.join('bin/fsevent_watch')
@@ -22,11 +22,11 @@ OBJ = SRC.map {|s| $obj_dir.join("#{s.basename('.c')}.o")}
 $now = DateTime.now.xmlschema rescue Time.now.xmlschema
 
 $CC = ENV['CC'] || `which clang || which gcc`.strip
-$CFLAGS = ENV['CFLAGS'] || '-fconstant-cfstrings -fno-strict-aliasing -Wall'
-$ARCHFLAGS = ENV['ARCHFLAGS'] || '-arch x86_64 -arch i386'
-$DEFINES = "-DNS_BUILD_32_LIKE_64 -DNS_BLOCK_ASSERTIONS -DOS_OBJECT_USE_OBJC=0 -DPROJECT_VERSION=#{FSEVENT_WATCH_EXE_VERSION}"
+$CFLAGS = ENV['CFLAGS'] || '-fconstant-cfstrings -fasm-blocks -fstrict-aliasing -Wall'
+$ARCHFLAGS = ENV['ARCHFLAGS'] || '-arch x86_64'
+$DEFINES = "-DNS_BUILD_32_LIKE_64 -DNS_BLOCK_ASSERTIONS -DPROJECT_VERSION=#{FSEVENT_WATCH_EXE_VERSION}"
 
-$GCC_C_LANGUAGE_STANDARD = ENV['GCC_C_LANGUAGE_STANDARD'] || 'gnu99'
+$GCC_C_LANGUAGE_STANDARD = ENV['GCC_C_LANGUAGE_STANDARD'] || 'gnu11'
 
 # generic developer id name so it'll match correctly for anyone who has only
 # one developer id in their keychain (not that I expect anyone else to bother)
@@ -72,7 +72,7 @@ end
 
 task :release => :sw_vers do
   $DEFINES = "-DNDEBUG #{$DEFINES}"
-  $CFLAGS = "#{$CFLAGS} -O3"
+  $CFLAGS = "#{$CFLAGS} -Ofast"
 end
 
 desc 'configure build type depending on whether ENV var FWDEBUG is set'
@@ -148,7 +148,7 @@ file $obj_dir.join('Info.plist').to_s => [$obj_dir.to_s, :setup_env] do
     key['CFBundleDisplayName']
     string['FSEvent Watch CLI']
     key['NSHumanReadableCopyright']
-    string['Copyright (C) 2011-2013 Travis Tilley']
+    string['Copyright (C) 2011-2015 Travis Tilley']
 
     key['CFBundleVersion']
     string["#{FSEVENT_WATCH_EXE_VERSION}"]
@@ -222,4 +222,3 @@ task :replace_exe => :build do
 end
 
 task :default => [:replace_exe, :clean]
-

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "cli.h"
+#include "FSEventsFix.h"
 
 // TODO: set on fire. cli.{h,c} handle both parsing and defaults, so there's
 //       no need to set those here. also, in order to scope metadata by path,
@@ -34,7 +35,7 @@ static void         callback(FSEventStreamRef streamRef,
                              void* eventPaths,
                              const FSEventStreamEventFlags eventFlags[],
                              const FSEventStreamEventId eventIds[]);
-
+static bool needs_fsevents_fix = false;
 
 // Resolve a path and append it to the CLI settings structure
 // The FSEvents API will, internally, resolve paths using a similar scheme.
@@ -126,9 +127,18 @@ static void append_path(const char* path)
 #endif
 
   CFStringRef cfPath = CFURLCopyFileSystemPath(placeholder, kCFURLPOSIXPathStyle);
+  CFRelease(placeholder);
+
+  char cPath[PATH_MAX];
+  if (CFStringGetCString(cfPath, cPath, PATH_MAX, kCFStringEncodingUTF8)) {
+    FSEventsFixRepairStatus status = FSEventsFixRepairIfNeeded(cPath);
+    if (status == FSEventsFixRepairStatusFailed) {
+      needs_fsevents_fix = true;
+    }
+  }
+
   CFArrayAppendValue(config.paths, cfPath);
   CFRelease(cfPath);
-  CFRelease(placeholder);
 
 #else
 
@@ -462,6 +472,10 @@ int main(int argc, const char* argv[])
 {
   parse_cli_settings(argc, argv);
 
+  if (needs_fsevents_fix) {
+    FSEventsFixEnable();
+  }
+
   FSEventStreamContext context = {0, NULL, NULL, NULL, NULL};
   FSEventStreamRef stream;
   stream = FSEventStreamCreate(kCFAllocatorDefault,
@@ -476,6 +490,10 @@ int main(int argc, const char* argv[])
   FSEventStreamShow(stream);
   fprintf(stderr, "\n");
 #endif
+
+  if (needs_fsevents_fix) {
+    FSEventsFixDisable();
+  }
 
   FSEventStreamScheduleWithRunLoop(stream,
                                    CFRunLoopGetCurrent(),
