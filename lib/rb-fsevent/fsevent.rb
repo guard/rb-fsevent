@@ -52,7 +52,7 @@ class FSEvent
 
   def stop
     unless @pipe.nil?
-      Process.kill('KILL', @pipe.pid) if process_running?(pid)
+      Process.kill('KILL', @pipe.pid) if process_running?(@pipe.pid)
       @pipe.close
     end
   rescue IOError
