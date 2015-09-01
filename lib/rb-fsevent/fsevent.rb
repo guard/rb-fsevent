@@ -52,12 +52,21 @@ class FSEvent
 
   def stop
     unless @pipe.nil?
-      Process.kill('KILL', @pipe.pid)
+      Process.kill('KILL', @pipe.pid) if process_running?(pid)
       @pipe.close
     end
   rescue IOError
   ensure
     @running = false
+  end
+
+  def process_running?(pid)
+    begin
+      Process.kill(0, pid)
+      true
+    rescue Errno::ESRCH
+      false
+    end
   end
 
   if RUBY_VERSION < '1.9'
