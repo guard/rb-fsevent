@@ -13,8 +13,7 @@ Gem::Specification.new do |s|
   s.description = 'FSEvents API with Signals catching (without RubyCocoa)'
   s.license     = 'MIT'
 
-  s.files        = `git ls-files`.split($/)
-  s.test_files   = s.files.grep(%r{^spec/})
+  s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^spec/}) }
   s.require_path = 'lib'
 
   s.add_development_dependency  'bundler',     '~> 1.0'
