@@ -1,7 +1,7 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "rb-fsevent/version"
+require 'rb-fsevent/version'
 
 Gem::Specification.new do |s|
   s.name        = 'rb-fsevent'
@@ -16,8 +16,7 @@ Gem::Specification.new do |s|
   s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^spec/}) }
   s.require_path = 'lib'
 
-  s.add_development_dependency  'bundler',     '~> 1.0'
-  s.add_development_dependency  'rspec',       '~> 2.11'
-  s.add_development_dependency  'guard-rspec', '~> 4.2'
+  s.add_development_dependency 'bundler',     '~> 1.0'
+  s.add_development_dependency 'rspec',       '~> 2.11'
+  s.add_development_dependency 'guard-rspec', '~> 4.2'
 end
-
