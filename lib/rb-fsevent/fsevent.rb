@@ -103,9 +103,7 @@ class FSEvent
     end
   else
     def open_pipe
-      pid = IO.popen([self.class.watcher_path] + @options + @paths)
-    ensure
-      generate_assassin_for(pid)
+      IO.popen([self.class.watcher_path] + @options + @paths)
     end
   end
 
@@ -122,53 +120,4 @@ class FSEvent
     opts.map {|opt| "#{opt}"}
   end
 
-  unless RUBY_VERSION < '1.9'
-    require 'securerandom'
-    require 'tmpdir'
-
-    def generate_assassin_for(child_pid, options = {})
-      path = File.join(Dir.tmpdir, "assassin-#{ child_pid }-#{ SecureRandom.uuid }.rb")
-      script = assassin_script_for(child_pid, options)
-      IO.binwrite(path, script)
-      pid = Process.spawn "ruby #{ path }"
-      Process.detach(pid)
-      [pid, path]
-    end
-
-    def assassin_script_for(child_pid, options = {})
-      parent_pid = Process.pid
-
-      assassin = <<-__
-        parent_pid = #{ parent_pid }
-        child_pid = #{ child_pid }
-
-        m = 24*60*60
-        n = 4242
-        
-        m.times do
-          begin
-            Process.kill(0, parent_pid)
-          rescue Object => e
-            if e.is_a?(Errno::ESRCH)
-              n.times do
-                begin
-                  Process.kill(15, child_pid) rescue nil
-                  sleep(rand + rand)
-                  Process.kill(9, child_pid) rescue nil
-                  sleep(rand + rand)
-                  Process.kill(0, child_pid)
-                rescue Errno::ESRCH
-                  break
-                end
-              end
-            end
-
-            exit
-          end
-
-          sleep(1)
-        end
-      __
-    end
-  end
 end
