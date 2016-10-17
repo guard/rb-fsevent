@@ -19,4 +19,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'bundler',     '~> 1.0'
   s.add_development_dependency 'rspec',       '~> 2.11'
   s.add_development_dependency 'guard-rspec', '~> 4.2'
+
+  s.add_runtime_dependency 'assassin', '>= 0.4.2'
 end
