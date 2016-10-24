@@ -113,27 +113,6 @@ static inline CFStringRef TSICTStringCreateStringFromIntermediateRepresentation(
     return string;
 }
 
-static inline CFDataRef TSICTStringCreateDataWithDataOfTypeAndFormat(CFDataRef data, TSITStringTag type, TSITStringFormat format)
-{
-    CFRetain(data);
-
-    if (format == kTSITStringFormatDefault) {
-        format = TSICTStringGetDefaultFormat();
-    }
-
-    TStringIRep* rep = TSICTStringCreateWithDataOfTypeAndFormat(data, type, format);
-    if (rep == NULL) {
-        return NULL;
-    }
-
-    CFDataRef result = TSICTStringCreateDataFromIntermediateRepresentation(rep);
-
-    TSICTStringDestroy(rep);
-    CFRelease(data);
-
-    return result;
-}
-
 static inline void TSICTStringAppendObjectToMutableDataWithFormat(CFTypeRef object, CFMutableDataRef buffer, TSITStringFormat format)
 {
     if (object == NULL) {
