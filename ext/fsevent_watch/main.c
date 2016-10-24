@@ -1,4 +1,5 @@
 #include "common.h"
+#include "signal_handlers.h"
 #include "cli.h"
 #include "FSEventsFix.h"
 
@@ -470,6 +471,7 @@ static void callback(__attribute__((unused)) FSEventStreamRef streamRef,
 
 int main(int argc, const char* argv[])
 {
+  install_signal_handlers();
   parse_cli_settings(argc, argv);
 
   if (needs_fsevents_fix) {
