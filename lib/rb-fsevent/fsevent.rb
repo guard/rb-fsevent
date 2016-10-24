@@ -102,8 +102,12 @@ class FSEvent
       return str
     end
   else
+    require 'assassin'
+
     def open_pipe
-      IO.popen([self.class.watcher_path] + @options + @paths)
+      pipe = IO.popen([self.class.watcher_path] + @options + @paths)
+    ensure
+      Assassin.at_exit_kill(pipe.pid)
     end
   end
 
