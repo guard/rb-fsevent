@@ -11,3 +11,4 @@ Desktop DB
 Desktop DF
 Gemfile.lock
 pkg/*
+.ruby-version
