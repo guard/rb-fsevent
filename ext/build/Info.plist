@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleExecutable</key>
+    <string>fsevent_watch</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.teaspoonofinsanity.fsevent_watch</string>
+    <key>CFBundleName</key>
+    <string>fsevent_watch</string>
+    <key>CFBundleDisplayName</key>
+    <string>FSEvent Watch CLI</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright (C) 2011-2015 Travis Tilley</string>
+    <key>CFBundleVersion</key>
+    <string>0.1.4</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.12</string>
+    <key>DTSDKBuild</key>
+    <string>16B2649</string>
+    <key>DTSDKName</key>
+    <string>macosx10.12</string>
+    <key>DTSDKPath</key>
+    <string>/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk</string>
+    <key>BuildMachineOSBuild</key>
+    <string>16B2555</string>
+    <key>BuildMachineOSVersion</key>
+    <string>10.12.1</string>
+    <key>FSEWCompiledAt</key>
+    <string>2016-11-21T15:58:52-05:00</string>
+    <key>FSEWVersionInfoBuilder</key>
+    <string>arashkashani</string>
+    <key>FSEWBuildTriple</key>
+    <string>x86_64-apple-darwin16.1.0</string>
+    <key>FSEWCC</key>
+    <string>/usr/bin/clang</string>
+    <key>FSEWCCVersion</key>
+    <string>Apple LLVM version 8.0.0 (clang-800.0.42.1)</string>
+    <key>FSEWCFLAGS</key>
+    <string>-fconstant-cfstrings -fasm-blocks -fstrict-aliasing -Wall -mmacosx-version-min=10.12 -Ofast</string>
+  </dict>
+</plist>
