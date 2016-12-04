@@ -9,7 +9,7 @@ task :default => :spec
 namespace(:spec) do
   desc "Run all specs on multiple ruby versions"
   task(:portability) do
-    versions = %w[2.2.2 2.3.0-dev rbx-2.5.5 jruby-1.7.9]
+    versions = %w[2.3.3 2.2.2 rbx-2.5.5 jruby-1.7.9]
     versions.each do |version|
       # system <<-BASH
       #   bash -c 'source ~/.rvm/scripts/rvm;
