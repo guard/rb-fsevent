@@ -12,20 +12,20 @@ describe FSEvent do
 
   it "shouldn't pass anything to watch when instantiated without a path" do
     fsevent = FSEvent.new
-    fsevent.paths.should be_nil
-    fsevent.callback.should be_nil
+    expect(fsevent.paths).to be_nil
+    expect(fsevent.callback).to be_nil
   end
 
   it "should pass path and block to watch when instantiated with them" do
     blk = proc { }
     fsevent = FSEvent.new(@fixture_path, &blk)
-    fsevent.paths.should == [@fixture_path]
-    fsevent.callback.should == blk
+    expect(fsevent.paths).to eq([@fixture_path])
+    expect(fsevent.callback).to eq(blk)
   end
 
   it "should have a watcher_path that resolves to an executable file" do
-    File.exists?(FSEvent.watcher_path).should be true
-    File.executable?(FSEvent.watcher_path).should be true
+    expect(File.exists?(FSEvent.watcher_path)).to be true
+    expect(File.executable?(FSEvent.watcher_path)).to be true
   end
 
   it "should work with path with an apostrophe" do
@@ -35,12 +35,12 @@ describe FSEvent do
     @fsevent.watch custom_path.to_s do |paths|
       @results += paths
     end
-    @fsevent.paths.should == ["#{custom_path}"]
+    expect(@fsevent.paths).to eq(["#{custom_path}"])
     run
     FileUtils.touch file
     stop
     File.delete file
-    @results.should == [custom_path.to_s + '/']
+    expect(@results).to eq([custom_path.to_s + '/'])
   end
 
   it "should catch new file" do
@@ -50,28 +50,28 @@ describe FSEvent do
     FileUtils.touch file
     stop
     File.delete file
-    @results.should == [@fixture_path.to_s + '/']
+    expect(@results).to eq([@fixture_path.to_s + '/'])
   end
 
   it "should catch file update" do
     file = @fixture_path.join("folder1/file1.txt")
-    File.exists?(file).should be true
+    expect(File.exists?(file)).to be true
     run
     FileUtils.touch file
     stop
-    @results.should == [@fixture_path.join("folder1/").to_s]
+    expect(@results).to eq([@fixture_path.join("folder1/").to_s])
   end
 
   it "should catch files update" do
     file1 = @fixture_path.join("folder1/file1.txt")
     file2 = @fixture_path.join("folder1/folder2/file2.txt")
-    File.exists?(file1).should be true
-    File.exists?(file2).should be true
+    expect(File.exists?(file1)).to be true
+    expect(File.exists?(file2)).to be true
     run
     FileUtils.touch file1
     FileUtils.touch file2
     stop
-    @results.should == [@fixture_path.join("folder1/").to_s, @fixture_path.join("folder1/folder2/").to_s]
+    expect(@results).to eq([@fixture_path.join("folder1/").to_s, @fixture_path.join("folder1/folder2/").to_s])
   end
 
   def run
