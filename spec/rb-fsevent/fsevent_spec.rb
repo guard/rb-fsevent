@@ -24,8 +24,8 @@ describe FSEvent do
   end
 
   it "should have a watcher_path that resolves to an executable file" do
-    File.exists?(FSEvent.watcher_path).should be_true
-    File.executable?(FSEvent.watcher_path).should be_true
+    File.exists?(FSEvent.watcher_path).should be true
+    File.executable?(FSEvent.watcher_path).should be true
   end
 
   it "should work with path with an apostrophe" do
@@ -55,7 +55,7 @@ describe FSEvent do
 
   it "should catch file update" do
     file = @fixture_path.join("folder1/file1.txt")
-    File.exists?(file).should be_true
+    File.exists?(file).should be true
     run
     FileUtils.touch file
     stop
@@ -65,8 +65,8 @@ describe FSEvent do
   it "should catch files update" do
     file1 = @fixture_path.join("folder1/file1.txt")
     file2 = @fixture_path.join("folder1/folder2/file2.txt")
-    File.exists?(file1).should be_true
-    File.exists?(file2).should be_true
+    File.exists?(file1).should be true
+    File.exists?(file2).should be true
     run
     FileUtils.touch file1
     FileUtils.touch file2
