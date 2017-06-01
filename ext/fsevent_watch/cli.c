@@ -27,7 +27,7 @@ static void default_args (struct cli_info* args_info)
   args_info->ignore_self_flag   = false;
   args_info->file_events_flag   = false;
   args_info->mark_self_flag     = false;
-  args_info->format_arg         = kFSEventWatchOutputFormatClassic;
+  args_info->format_arg         = kFSEventWatchOutputFormatOTNetstring;
 }
 
 static void cli_parser_release (struct cli_info* args_info)
@@ -199,4 +199,3 @@ int cli_parser (int argc, const char** argv, struct cli_info* args_info)
 
   return EXIT_SUCCESS;
 }
-

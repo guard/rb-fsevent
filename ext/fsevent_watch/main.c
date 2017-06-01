@@ -24,7 +24,7 @@ static struct {
   (double) 0.3,
   (CFOptionFlags) kFSEventStreamCreateFlagNone,
   NULL,
-  kFSEventWatchOutputFormatClassic
+  kFSEventWatchOutputFormatOTNetstring
 };
 
 // Prototypes
