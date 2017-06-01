@@ -44,27 +44,35 @@ class FSEvent
     while @running && IO::select([@pipe], nil, nil, nil)
       # managing the IO ourselves allows us to be careful and never pass an
       # incomplete message to OTNetstring.parse()
-      until @pipe.eof?
-        message = ""
-        length = ""
+      message = ""
+      length = ""
+      byte = nil
 
+      reading_length = true
+      found_length = false
+
+      while reading_length
         byte = @pipe.read(1)
-        while byte =~ /\d/
+        if "#{byte}" =~ /\d/
           length << byte
-          byte = @pipe.read(1)
+          found_length = true
+        elsif found_length == false
+          next
+        else
+          reading_length = false
         end
-        length = Integer(length, 10)
-        type = byte
-
-        message << "#{length}#{type}"
-        message << @pipe.read(length)
-
-        decoded = OTNetstring.parse(message)
-        modified_paths = decoded["events"].map {|event| event["path"]}
-        # passing the full info as a second block param feels icky, but such is
-        # the trap of backward compatibility.
-        callback.call(modified_paths, decoded)
       end
+      length = Integer(length, 10)
+      type = byte
+
+      message << "#{length}#{type}"
+      message << @pipe.read(length)
+
+      decoded = OTNetstring.parse(message)
+      modified_paths = decoded["events"].map {|event| event["path"]}
+      # passing the full info as a second block param feels icky, but such is
+      # the trap of backward compatibility.
+      callback.call(modified_paths, decoded)
     end
   rescue Interrupt, IOError, Errno::EBADF
   ensure
