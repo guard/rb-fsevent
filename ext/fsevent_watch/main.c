@@ -446,7 +446,10 @@ static void callback(__attribute__((unused)) FSEventStreamRef streamRef,
                       "    Item is a directory");
     FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsSymlink,
                       "    Item is a symbolic link");
-
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsHardlink,
+                      "    Item is a hard link");
+    FLAG_CHECK_STDERR(eventFlags[i], kFSEventStreamEventFlagItemIsLastHardlink,
+                      "    Item is the last hard link");
     fprintf(stderr, "  event path: %s\n", paths[i]);
     fprintf(stderr, "\n");
   }
