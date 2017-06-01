@@ -216,8 +216,10 @@ task :codesign => :build do
   sh "codesign -s '#{$CODE_SIGN_IDENTITY}' #{$obj_dir.join('fsevent_watch')}"
 end
 
+directory $this_dir.parent.join('bin')
+
 desc 'replace bundled fsevent_watch binary with build/fsevent_watch'
-task :replace_exe => :build do
+task :replace_exe => [$this_dir.parent.join('bin'), :build] do
   sh "mv #{$obj_dir.join('fsevent_watch')} #{$final_exe}"
 end
 
