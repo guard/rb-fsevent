@@ -43,5 +43,10 @@ extern FSEventStreamCreateFlags kFSEventStreamCreateFlagMarkSelf;
 extern FSEventStreamEventFlags  kFSEventStreamEventFlagOwnEvent;
 #endif
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 10100
+// flags related to hard links introduced in 10.10
+extern FSEventStreamEventFlags  kFSEventStreamEventFlagItemIsHardlink,
+                                kFSEventStreamEventFlagItemIsLastHardlink;
+#endif
 
 #endif // fsevent_watch_compat_h
