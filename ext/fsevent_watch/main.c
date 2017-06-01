@@ -350,18 +350,54 @@ static void tstring_output_format(size_t numEvents,
                        false);
     CFDictionarySetValue(event, CFSTR("path"), path);
 
-    CFNumberRef flags = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &eventFlags[i]);
-    CFDictionarySetValue(event, CFSTR("flags"), flags);
-
     CFNumberRef ident = CFNumberCreate(kCFAllocatorDefault, kCFNumberLongLongType, &eventIds[i]);
     CFDictionarySetValue(event, CFSTR("id"), ident);
+
+    CFNumberRef cflags = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &eventFlags[i]);
+    CFDictionarySetValue(event, CFSTR("cflags"), cflags);
+
+    CFMutableArrayRef flags = CFArrayCreateMutable(kCFAllocatorDefault,
+                              0, &kCFTypeArrayCallBacks);
+
+#define FLAG_ADD_NAME(flagsnum, flagnum, flagname, flagarray)   \
+  do {                                                          \
+    if (FLAG_CHECK(flagsnum, flagnum)) {                        \
+      CFArrayAppendValue(flagarray, CFSTR(flagname)); } }       \
+  while(0)
+
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagMustScanSubDirs,     "MustScanSubDirs", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagUserDropped,         "UserDropped", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagKernelDropped,       "KernelDropped", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagEventIdsWrapped,     "EventIdsWrapped", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagHistoryDone,         "HistoryDone", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagRootChanged,         "RootChanged", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagMount,               "Mount", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagUnmount,             "Unmount", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemCreated,         "ItemCreated", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemRemoved,         "ItemRemoved", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemInodeMetaMod,    "ItemInodeMetaMod", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemRenamed,         "ItemRenamed", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemModified,        "ItemModified", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemFinderInfoMod,   "ItemFinderInfoMod", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemChangeOwner,     "ItemChangeOwner", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemXattrMod,        "ItemXattrMod", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemIsFile,          "ItemIsFile", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemIsDir,           "ItemIsDir", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemIsSymlink,       "ItemIsSymlink", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagOwnEvent,            "OwnEvent", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemIsHardlink,      "ItemIsHardLink", flags);
+    FLAG_ADD_NAME(eventFlags[i], kFSEventStreamEventFlagItemIsLastHardlink,  "ItemIsLastHardLink", flags);
+
+    CFDictionarySetValue(event, CFSTR("flags"), flags);
+
 
     CFArrayAppendValue(events, event);
 
     CFRelease(event);
     CFRelease(path);
-    CFRelease(flags);
     CFRelease(ident);
+    CFRelease(cflags);
+    CFRelease(flags);
   }
 
   CFMutableDictionaryRef meta = CFDictionaryCreateMutable(kCFAllocatorDefault,
