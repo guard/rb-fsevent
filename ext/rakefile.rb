@@ -8,7 +8,7 @@ require 'rake/clean'
 raise "unable to find xcodebuild" unless system('which', 'xcodebuild')
 
 
-FSEVENT_WATCH_EXE_VERSION = '0.1.4'
+FSEVENT_WATCH_EXE_VERSION = '0.1.5'
 
 $this_dir = Pathname.new(__FILE__).dirname.expand_path
 $final_exe = $this_dir.parent.join('bin/fsevent_watch')
@@ -148,7 +148,7 @@ file $obj_dir.join('Info.plist').to_s => [$obj_dir.to_s, :setup_env] do
     key['CFBundleDisplayName']
     string['FSEvent Watch CLI']
     key['NSHumanReadableCopyright']
-    string['Copyright (C) 2011-2015 Travis Tilley']
+    string['Copyright (C) 2011-2017 Travis Tilley']
 
     key['CFBundleVersion']
     string["#{FSEVENT_WATCH_EXE_VERSION}"]
