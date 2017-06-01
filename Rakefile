@@ -9,7 +9,7 @@ task :default => :spec
 namespace(:spec) do
   desc "Run all specs on multiple ruby versions"
   task(:portability) do
-    versions = %w[2.2.2 2.3.0-dev rbx-2.5.5 jruby-1.7.9]
+    versions = %w[2.4.1 rbx-3.72 jruby-1.7.26 jruby-9.1.8.0]
     versions.each do |version|
       # system <<-BASH
       #   bash -c 'source ~/.rvm/scripts/rvm;
@@ -24,6 +24,7 @@ namespace(:spec) do
                  [[ ! -a $HOME/.rbenv/versions/#{version} ]] && rbenv install #{version};
                  rbenv shell #{version};
                  rbenv which bundle 2> /dev/null || gem install bundler;
+                 rm Gemfile.lock;
                  bundle install;
                  rake spec;'
       BASH
