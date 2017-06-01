@@ -5,7 +5,7 @@ describe FSEvent do
   before(:each) do
     @results = []
     @fsevent = FSEvent.new
-    @fsevent.watch @fixture_path.to_s, {:latency => 0.5} do |paths|
+    @fsevent.watch @fixture_path.to_s, {:latency => 0.3, :no_defer => true} do |paths|
       @results += paths
     end
   end
@@ -26,21 +26,6 @@ describe FSEvent do
   it "should have a watcher_path that resolves to an executable file" do
     expect(File.exists?(FSEvent.watcher_path)).to be true
     expect(File.executable?(FSEvent.watcher_path)).to be true
-  end
-
-  it "should work with path with an apostrophe" do
-    custom_path = @fixture_path.join("custom 'path")
-    file = custom_path.join("newfile.rb").to_s
-    File.delete file if File.exists? file
-    @fsevent.watch custom_path.to_s do |paths|
-      @results += paths
-    end
-    expect(@fsevent.paths).to eq(["#{custom_path}"])
-    run
-    FileUtils.touch file
-    stop
-    File.delete file
-    expect(@results).to eq([custom_path.to_s + '/'])
   end
 
   it "should catch new file" do
