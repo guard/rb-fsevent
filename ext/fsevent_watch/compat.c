@@ -28,3 +28,9 @@ FSEventStreamEventFlags   kFSEventStreamEventFlagOwnEvent           = 0x00080000
 FSEventStreamEventFlags   kFSEventStreamEventFlagItemIsHardlink     = 0x00100000;
 FSEventStreamEventFlags   kFSEventStreamEventFlagItemIsLastHardlink = 0x00200000;
 #endif
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 10130
+FSEventStreamCreateFlags  kFSEventStreamCreateFlagUseExtendedData   = 0x00000040;
+FSEventStreamEventFlags   kFSEventStreamEventFlagItemCloned         = 0x00400000;
+#endif
+
