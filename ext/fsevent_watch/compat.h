@@ -9,20 +9,57 @@
  */
 
 
-#ifndef fsevent_watch_compat_h
-#define fsevent_watch_compat_h
+#ifndef listen_fsevents_compat_h
+#define listen_fsevents_compat_h
 
 #ifndef __CORESERVICES__
 #include <CoreServices/CoreServices.h>
 #endif // __CORESERVICES__
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1060
-// ignoring events originating from the current process introduced in 10.6
+#ifndef __AVAILABILITY__
+#include <Availability.h>
+#endif // __AVAILABILITY__
+
+#ifndef __MAC_10_6
+#define __MAC_10_6            1060
+#endif
+#ifndef __MAC_10_7
+#define __MAC_10_7            1070
+#endif
+#ifndef __MAC_10_9
+#define __MAC_10_9            1090
+#endif
+#ifndef __MAC_10_10
+#define __MAC_10_10         101000
+#endif
+#ifndef __MAC_10_13
+#define __MAC_10_13         101300
+#endif
+#ifndef __IPHONE_6_0
+#define __IPHONE_6_0         60000
+#endif
+#ifndef __IPHONE_7_0
+#define __IPHONE_7_0         70000
+#endif
+#ifndef __IPHONE_9_0
+#define __IPHONE_9_0         90000
+#endif
+#ifndef __IPHONE_11_0
+#define __IPHONE_11_0       110000
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) && MAC_OS_X_VERSION_MAX_ALLOWED < __MAC_10_6) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_6_0)
 extern FSEventStreamCreateFlags kFSEventStreamCreateFlagIgnoreSelf;
 #endif
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1070
-// file-level events introduced in 10.7
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) && MAC_OS_X_VERSION_MAX_ALLOWED < __MAC_10_7) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_6_0)
 extern FSEventStreamCreateFlags kFSEventStreamCreateFlagFileEvents;
 extern FSEventStreamEventFlags  kFSEventStreamEventFlagItemCreated,
                                 kFSEventStreamEventFlagItemRemoved,
@@ -37,21 +74,27 @@ extern FSEventStreamEventFlags  kFSEventStreamEventFlagItemCreated,
                                 kFSEventStreamEventFlagItemIsSymlink;
 #endif
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1090
-// marking, rather than ignoring, events originating from the current process introduced in 10.9
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) && MAC_OS_X_VERSION_MAX_ALLOWED < __MAC_10_9) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_7_0)
 extern FSEventStreamCreateFlags kFSEventStreamCreateFlagMarkSelf;
 extern FSEventStreamEventFlags  kFSEventStreamEventFlagOwnEvent;
 #endif
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 10100
-// flags related to hard links introduced in 10.10
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) && MAC_OS_X_VERSION_MAX_ALLOWED < __MAC_10_10) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_9_0)
 extern FSEventStreamEventFlags  kFSEventStreamEventFlagItemIsHardlink,
                                 kFSEventStreamEventFlagItemIsLastHardlink;
 #endif
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 10130
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) && MAC_OS_X_VERSION_MAX_ALLOWED < __MAC_10_13) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_11_0)
 extern FSEventStreamCreateFlags kFSEventStreamCreateFlagUseExtendedData;
 extern FSEventStreamEventFlags  kFSEventStreamEventFlagItemCloned;
 #endif
 
-#endif // fsevent_watch_compat_h
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // listen_fsevents_compat_h
