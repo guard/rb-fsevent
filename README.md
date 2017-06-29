@@ -7,8 +7,8 @@ Very simple & usable Mac OSX FSEvents API
 
 * RubyCocoa not required!
 * Signals are working (really)
-* Tested on MRI 2.1, RBX 2.5, JRuby
-* Tested on 10.10
+* Tested on MRI 2.4.1, RBX 3.72, JRuby 1.7.26 and 9.1.8.0
+* Tested on 10.8
 
 ## HFS+ filename corruption bug
 
