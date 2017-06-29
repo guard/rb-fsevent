@@ -250,7 +250,7 @@ Pull requests are quite welcome! Please ensure that your commits are in a topic 
 
 The list of tested targets is currently:
 
-    %w[2.2.2 2.3.0-dev rbx-2.5.5 jruby-1.7.9]
+    %w[2.4.1 rbx-3.72 jruby-1.7.26 jruby-9.1.8.0]
 
 ## Authors
 
