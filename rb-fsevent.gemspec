@@ -13,6 +13,10 @@ Gem::Specification.new do |s|
   s.description = 'FSEvents API with Signals catching (without RubyCocoa)'
   s.license     = 'MIT'
 
+  s.metadata = {
+    'source_code_uri' => 'https://github.com/thibaudgg/rb-fsevent'
+  }
+
   s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^spec/}) }
   s.require_path = 'lib'
 
