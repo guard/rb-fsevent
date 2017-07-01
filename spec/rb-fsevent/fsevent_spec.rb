@@ -4,10 +4,12 @@ describe FSEvent do
 
   before(:each) do
     @results = []
-    @fsevent = FSEvent.new
-    @fsevent.watch @fixture_path.to_s, {:latency => 0.3, :no_defer => true} do |paths|
+    # lambdas enforce arity...
+    callback = lambda do |paths|
       @results += paths
     end
+    @fsevent = FSEvent.new
+    @fsevent.watch @fixture_path.to_s, {:latency => 0.3, :no_defer => true}, &callback
   end
 
   it "shouldn't pass anything to watch when instantiated without a path" do

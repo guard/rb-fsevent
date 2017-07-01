@@ -72,7 +72,12 @@ class FSEvent
       modified_paths = decoded["events"].map {|event| event["path"]}
       # passing the full info as a second block param feels icky, but such is
       # the trap of backward compatibility.
-      callback.call(modified_paths, decoded)
+      case callback.arity
+        when 1
+          callback.call(modified_paths)
+        when 2
+          callback.call(modified_paths, decoded)
+      end
     end
   rescue Interrupt, IOError, Errno::EBADF
   ensure
