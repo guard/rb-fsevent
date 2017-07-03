@@ -11,9 +11,11 @@ Very simple & usable Mac OSX FSEvents API
 
 ## HFS+ filename corruption bug
 
-There is a _very_ long-standing (since 2011) OSX bug where sometimes the filename metadata for HFS+ filesystems will get corrupted, resulting in some APIs returning one case for a file, and other APIs returning another. This corruption is not currently fixed by their tools, though Apple has been made aware of the issue and are working on it (as of may 2015). The result is that sometimes, _for no visible reason to the user_, fsevents would simply not work. As of rb-fsevent 0.9.5 this issue is properly detected and an insanely hacky (but effective) workaround is used that replaces the system `realpath()` with a custom implementation that should always return the same value as the kernel reporting (thus fixing fsevents).
+There is a _very_ long-standing (since 2011) OSX bug where sometimes the filename metadata for HFS+ filesystems will get corrupted, resulting in some APIs returning one case for a file, and other APIs returning another. The result is that sometimes, _for no visible reason to the user_, fsevents would simply not work. As of rb-fsevent 0.9.5 this issue is properly detected and an insanely hacky (but effective) workaround is used that replaces the system `realpath()` with a custom implementation that should almost always return the same value as the kernel reporting (thus fixing fsevents). The major flaw in the workaround is that it may return the wrong path for hard links.
 
 Please note that this doesn't repair the underlying issue on disk. Other apps and libraries using fsevents will continue to break with no warning. There may be other issues unrelated to fsevents.
+
+__This bug is resolved in MacOS 10.12 and all users are strongly encouraged to upgrade.__
 
 ## Install
 
