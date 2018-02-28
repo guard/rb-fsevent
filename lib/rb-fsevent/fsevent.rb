@@ -52,7 +52,7 @@ class FSEvent
       found_length = false
 
       while reading_length
-        byte = @pipe.read(1)
+        byte = @pipe.read_nonblock(1)
         if "#{byte}" =~ /\d/
           length << byte
           found_length = true
@@ -79,6 +79,8 @@ class FSEvent
           callback.call(modified_paths, decoded)
       end
     end
+  rescue EOFError
+    sleep 1
   rescue Interrupt, IOError, Errno::EBADF
   ensure
     stop
