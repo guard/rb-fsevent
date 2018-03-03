@@ -79,8 +79,6 @@ class FSEvent
           callback.call(modified_paths, decoded)
       end
     end
-  rescue EOFError
-    sleep 1
   rescue Interrupt, IOError, Errno::EBADF
   ensure
     stop
