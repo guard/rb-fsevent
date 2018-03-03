@@ -52,7 +52,7 @@ class FSEvent
       found_length = false
 
       while reading_length
-        byte = @pipe.read(1)
+        byte = @pipe.read_nonblock(1)
         if "#{byte}" =~ /\d/
           length << byte
           found_length = true
