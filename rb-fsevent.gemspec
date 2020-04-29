@@ -20,7 +20,6 @@ Gem::Specification.new do |s|
   s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^spec/}) }
   s.require_path = 'lib'
 
-  s.add_development_dependency 'bundler',     '~> 1.0'
   s.add_development_dependency 'rspec',       '~> 3.6'
   s.add_development_dependency 'guard-rspec', '~> 4.2'
   s.add_development_dependency 'rake',        '~> 12.0'
