@@ -38,12 +38,16 @@ $BUILD_TRIPLE = "#{$arch}-apple-darwin#{$os_release}"
 
 $CCVersion = `#{$CC} --version | head -n 1`.strip
 
-
 CLEAN.include OBJ.map(&:to_s)
 CLEAN.include $obj_dir.join('Info.plist').to_s
 CLEAN.include $obj_dir.join('fsevent_watch').to_s
 CLOBBER.include $final_exe.to_s
 
+task :determine_arch_type do
+  return if ENV['ARCHFLAGS']
+  # replace archflags if we're on apple silicon
+  $ARCHFLAGS = '-arch arm64 -arch x86_64' if $arch == 'arm64'
+end
 
 task :sw_vers do
   $mac_product_version = `sw_vers -productVersion`.strip
@@ -84,22 +88,17 @@ task :set_build_type => :sw_vers do
   end
 end
 
-desc 'set build arch to ppc'
-task :ppc do
-  $ARCHFLAGS = '-arch ppc'
-end
-
 desc 'set build arch to x86_64'
 task :x86_64 do
   $ARCHFLAGS = '-arch x86_64'
 end
 
-desc 'set build arch to i386'
-task :x86 do
-  $ARCHFLAGS = '-arch i386'
+desc 'set build arch to arm64'
+task :arm64 do
+  $ARCHFLAGS = '-arch arm64'
 end
 
-task :setup_env => [:set_build_type, :sw_vers, :get_sdk_info]
+task :setup_env => [:set_build_type, :determine_arch_type, :sw_vers, :get_sdk_info]
 
 directory $obj_dir.to_s
 file $obj_dir.to_s => :setup_env

@@ -14,12 +14,8 @@
 #define COMPILER "unknown"
 #endif
 
-#if defined(__ppc__)
-#define TARGET_CPU "ppc"
-#elif defined(__ppc64__)
-#define TARGET_CPU "ppc64"
-#elif defined(__i386__)
-#define TARGET_CPU "i386"
+#if defined(__arm64__)
+#define TARGET_CPU "arm64"
 #elif defined(__x86_64__)
 #define TARGET_CPU "x86_64"
 #else
