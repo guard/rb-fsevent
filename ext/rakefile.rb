@@ -99,6 +99,11 @@ task :x86 do
   $ARCHFLAGS = '-arch i386'
 end
 
+desc 'set build arch to arm64'
+task :arm64 do
+  $ARCHFLAGS = '-arch arm64'
+end
+
 task :setup_env => [:set_build_type, :sw_vers, :get_sdk_info]
 
 directory $obj_dir.to_s

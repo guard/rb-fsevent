@@ -22,6 +22,8 @@
 #define TARGET_CPU "i386"
 #elif defined(__x86_64__)
 #define TARGET_CPU "x86_64"
+#elif defined(__arm64__)
+#define TARGET_CPU "arm64"
 #else
 #define TARGET_CPU "unknown"
 #endif
