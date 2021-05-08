@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
 
 class FSEvent
-  VERSION = '0.10.4'
+  VERSION = '0.11.0'
 end
