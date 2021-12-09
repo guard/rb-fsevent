@@ -44,8 +44,8 @@ class FSEvent
     while @running && IO::select([@pipe], nil, nil, nil)
       # managing the IO ourselves allows us to be careful and never pass an
       # incomplete message to OTNetstring.parse()
-      message = ""
-      length = ""
+      message = String.new
+      length = String.new
       byte = nil
 
       reading_length = true
