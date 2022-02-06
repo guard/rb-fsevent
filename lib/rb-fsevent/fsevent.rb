@@ -89,7 +89,7 @@ class FSEvent
       Process.kill('KILL', @pipe.pid) if process_running?(@pipe.pid)
       @pipe.close
     end
-  rescue IOError
+  rescue IOError, Errno::EBADF
   ensure
     @running = false
   end
