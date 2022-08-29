@@ -28,7 +28,7 @@ module OTNetstring
     def parse(io, encoding = 'internal', fallback_encoding = nil)
       fallback_encoding = io.encoding if io.respond_to? :encoding
       io = StringIO.new(io) if io.respond_to? :to_str
-      length, byte = "", nil
+      length, byte = String.new, nil
 
       while byte.nil? || byte =~ /\d/
         length << byte if byte
