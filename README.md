@@ -1,4 +1,4 @@
-[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/thibaudgg/rb-fsevent)
+[![Code Climate Maintainability](https://codeclimate.com/github/guard/rb-fsevent.svg)](https://codeclimate.com/github/guard/rb-fsevent)
 [![endorse](https://api.coderwall.com/ttilley/endorsecount.png)](https://coderwall.com/ttilley)
 
 # rb-fsevent
