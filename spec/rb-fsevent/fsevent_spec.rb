@@ -26,13 +26,13 @@ describe FSEvent do
   end
 
   it "should have a watcher_path that resolves to an executable file" do
-    expect(File.exists?(FSEvent.watcher_path)).to be true
+    expect(File.exist?(FSEvent.watcher_path)).to be true
     expect(File.executable?(FSEvent.watcher_path)).to be true
   end
 
   it "should catch new file" do
     file = @fixture_path.join("newfile.rb")
-    File.delete file if File.exists? file
+    File.delete file if File.exist? file
     run
     FileUtils.touch file
     stop
@@ -42,7 +42,7 @@ describe FSEvent do
 
   it "should catch file update" do
     file = @fixture_path.join("folder1/file1.txt")
-    expect(File.exists?(file)).to be true
+    expect(File.exist?(file)).to be true
     run
     FileUtils.touch file
     stop
@@ -52,8 +52,8 @@ describe FSEvent do
   it "should catch files update" do
     file1 = @fixture_path.join("folder1/file1.txt")
     file2 = @fixture_path.join("folder1/folder2/file2.txt")
-    expect(File.exists?(file1)).to be true
-    expect(File.exists?(file2)).to be true
+    expect(File.exist?(file1)).to be true
+    expect(File.exist?(file2)).to be true
     run
     FileUtils.touch file1
     FileUtils.touch file2
